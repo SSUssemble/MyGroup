@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">SSUSSEMBLE</string>
+    <string name="toolbar_title">내 채팅</string>
+    <string name="drawer_open">내비게이션 열기</string>
+    <string name="drawer_close">내비게이션 닫기</string>
+    <string name="msg_token_fmt">FCM 토큰: %s</string>
+</resources>

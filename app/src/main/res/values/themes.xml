@@ -1,0 +1,16 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.SSUSSEMBLE" parent="Theme.Material3.DayNight.NoActionBar">
+    </style>
+
+    <style name="ToolbarTheme" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:fontFamily">@font/esamanru_bold</item>
+        <item name="android:textSize">30dp</item>
+    </style>
+
+    <style name="DrawerTheme" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:fontFamily">@font/esamanru_medium</item>
+    </style>
+
+    <style name="Theme.SSUSSEMBLE" parent="Base.Theme.SSUSSEMBLE" />
+</resources>

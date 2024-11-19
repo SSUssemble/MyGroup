@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "999192052274",
+    "firebase_url": "https://ssussemble-default-rtdb.firebaseio.com",
+    "project_id": "ssussemble",
+    "storage_bucket": "ssussemble.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:999192052274:android:baeb91f89a63b27572722b",
+        "android_client_info": {
+          "package_name": "com.example.ssussemble"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDCdihDfnhUR8uRPHNN-RFtG6SEB6h3G3w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
