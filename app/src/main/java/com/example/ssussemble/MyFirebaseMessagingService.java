@@ -77,9 +77,16 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     }
 
     private void showNotification(Map<String, String> data) {
+        // MainActivity로 이동하는 인텐트 생성
         Intent intent = new Intent(this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.putExtra("chatRoomId", data.get("chatRoomId"));
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+        // SharedPreferences에 채팅방 ID 저장
+        getSharedPreferences("chat_prefs", MODE_PRIVATE)
+                .edit()
+                .putString("pending_chat_room", data.get("chatRoomId"))
+                .apply();
 
         PendingIntent pendingIntent = PendingIntent.getActivity(
                 this,

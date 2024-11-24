@@ -101,15 +101,15 @@ public class ChattingWindowFragment extends Fragment {
 
     private void sendMessage(String message) {
         if (!message.trim().isEmpty()) {
-            long timeStamp = System.currentTimeMillis() + TimeZone.getTimeZone("Asia/Seoul").getRawOffset();
-            ChatData chatData = new ChatData(MainActivity.Login_id, message, timeStamp);
-
-            DatabaseReference messageRef = databaseReference.child("chats")
+            DatabaseReference messageRef = databaseReference.child("chatRooms")
                     .child(roomId)
-                    .child("messages")
+                    .child("chats")
                     .push();
 
+            ChatData chatData = new ChatData(MainActivity.Login_id, message, System.currentTimeMillis());
+
             messageRef.setValue(chatData).addOnSuccessListener(aVoid -> {
+                Log.d(TAG, "Message sent successfully");
                 sendFCMNotification(message);
                 binding.ChattingMessage.setText("");
             });
@@ -221,11 +221,9 @@ public class ChattingWindowFragment extends Fragment {
     }
 
     private void initializeMessageListener() {
-        final long[] lastTimestamp = {System.currentTimeMillis()};
-
-        databaseReference.child("chats")
+        databaseReference.child("chatRooms")
                 .child(roomId)
-                .child("messages")
+                .child("chats")
                 .addChildEventListener(new ChildEventListener() {
                     @Override
                     public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
@@ -233,10 +231,6 @@ public class ChattingWindowFragment extends Fragment {
                         if (chatData != null) {
                             chatAdapter.addChat(chatData);
                             recyclerView.smoothScrollToPosition(chatAdapter.getItemCount() - 1);
-
-                            if (!chatData.getUserName().equals(MainActivity.Login_id)) {
-                                updateMessageStatus(snapshot.getKey());
-                            }
                         }
                     }
 
