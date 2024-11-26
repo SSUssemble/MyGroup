@@ -8,4 +8,6 @@
     <color name="teal_700">#FF018786</color>
     <color name="dark_blue">#0F0065</color>
     <color name="dark_white">#B8B8B8</color>
+    <color name="background_holo_dark">#141218</color>
+    <color name="background_holo_light">#FEF7FE</color>
 </resources>

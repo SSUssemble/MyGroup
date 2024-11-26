@@ -4,7 +4,7 @@
         <shape
             android:shape="oval">
             <solid
-                android:color="@color/black"/>
+                android:color="@color/white"/>
             <size
                 android:height="8dp"
                 android:width="8dp"/>
@@ -16,7 +16,7 @@
     </item>
 
     <item
-        android:drawable="@drawable/baseline_dark_mode_24"
+        android:drawable="@drawable/baseline_wb_sunny_24"
         android:top="5dp"
         android:left="5dp"
         android:bottom="5dp"
