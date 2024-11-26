@@ -31,11 +31,8 @@ import com.google.firebase.database.ValueEventListener;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.TimeZone;
 
-//그룹채팅방 알림 안오는 것, 알림 눌러도 해당 채팅방으로 이동하지 않는 문제 수정 중
 public class ChattingWindowFragment extends Fragment {
     private static final String ARG_TITLE = "title";
     private static final String TAG = "FCM";
@@ -66,50 +63,69 @@ public class ChattingWindowFragment extends Fragment {
         binding = FragmentChattingWindowBinding.inflate(inflater, container, false);
 
         if (getArguments() != null) {
-            title = getArguments().getString(ARG_TITLE);
             roomId = getArguments().getString("ROOM_ID");
+            title = getArguments().getString("title", roomId);
+
+            Toolbar toolbar = binding.cwToolbar;
+            toolbar.setTitle(title);
+            drawerLayout = binding.drawerLayout;
+            toolbar.setOnMenuItemClickListener(item -> {
+                if (item.getItemId() == R.id.setting) {
+                    drawerLayout.openDrawer(Gravity.RIGHT);
+                    return true;
+                }
+                return false;
+            });
+
+            // NavigationView 설정
+            binding.navigationView.setNavigationItemSelectedListener(item -> {
+                int itemId = item.getItemId();
+                if (itemId == R.id.menu_drawer_time) {
+                    // 회의 시간 정하기 구현
+                    drawerLayout.closeDrawer(Gravity.RIGHT);
+                    return true;
+                }
+                else if (itemId == R.id.menu_drawer_sub) {
+                    // 서브 채팅방 프래그먼트로 이동
+                    Fragment subChatFragment = SubChatRoomFragment.newInstance(roomId);
+                    getParentFragmentManager().beginTransaction()
+                            .replace(R.id.fragment_container, subChatFragment)
+                            .addToBackStack(null)
+                            .commit();
+                    drawerLayout.closeDrawer(Gravity.RIGHT);
+                    return true;
+                }
+                return false;
+            });
+
+            recyclerView = binding.ChattingRecycler;
+            layoutManager = new LinearLayoutManager(getContext());
+            layoutManager.setStackFromEnd(true);
+            recyclerView.setLayoutManager(layoutManager);
+            chatAdapter = new ChatAdapter();
+            recyclerView.setAdapter(chatAdapter);
+
+            initializeMessageListener();
+
+            binding.ChattingSend.setOnClickListener((view) -> {
+                String message = binding.ChattingMessage.getText().toString();
+                sendMessage(message);
+            });
         }
-
-
-        Toolbar toolbar = binding.cwToolbar;
-        toolbar.setTitle(title);
-        drawerLayout = binding.drawerLayout;
-        toolbar.setOnMenuItemClickListener(item -> {
-            if (item.getItemId() == R.id.setting) {
-                drawerLayout.openDrawer(Gravity.RIGHT);
-                return true;
-            }
-            return false;
-        });
-
-        recyclerView = binding.ChattingRecycler;
-        layoutManager = new LinearLayoutManager(getContext());
-        layoutManager.setStackFromEnd(true);
-        recyclerView.setLayoutManager(layoutManager);
-        chatAdapter = new ChatAdapter();
-        recyclerView.setAdapter(chatAdapter);
-
-        initializeMessageListener();
-
-        binding.ChattingSend.setOnClickListener((view) -> {
-            String message = binding.ChattingMessage.getText().toString();
-            sendMessage(message);
-        });
-
         return binding.getRoot();
     }
 
     private void sendMessage(String message) {
         if (!message.trim().isEmpty()) {
+            long timeStamp = System.currentTimeMillis() + TimeZone.getTimeZone("Asia/Seoul").getRawOffset();
+            ChatData chatData = new ChatData(MainActivity.Login_id, message, timeStamp);
+
             DatabaseReference messageRef = databaseReference.child("chatRooms")
                     .child(roomId)
                     .child("chats")
                     .push();
 
-            ChatData chatData = new ChatData(MainActivity.Login_id, message, System.currentTimeMillis());
-
             messageRef.setValue(chatData).addOnSuccessListener(aVoid -> {
-                Log.d(TAG, "Message sent successfully");
                 sendFCMNotification(message);
                 binding.ChattingMessage.setText("");
             });
@@ -183,43 +199,6 @@ public class ChattingWindowFragment extends Fragment {
         });
     }
 
-    private void sendFCMMessage(String token, String roomName, String message, String roomId) {
-        try {
-            JSONObject fcmMessage = new JSONObject();
-            JSONObject data = new JSONObject();
-            data.put("chatRoomId", roomId);
-            data.put("senderId", MainActivity.Login_id);
-            data.put("message", message);
-            data.put("roomName", roomName);
-
-            fcmMessage.put("to", token);
-            fcmMessage.put("data", data);
-
-            String fcmUrl = "https://fcm.googleapis.com/v1/projects/[YOUR-PROJECT-ID]/messages:send";
-            RequestQueue queue = Volley.newRequestQueue(requireContext());
-
-            JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, fcmUrl, fcmMessage,
-                    response -> Log.d(TAG, "FCM 전송 성공"),
-                    error -> Log.e(TAG, "FCM 전송 실패", error)) {
-                @Override
-                public Map<String, String> getHeaders() {
-                    Map<String, String> headers = new HashMap<>();
-                    headers.put("Authorization", "Bearer " + getAccessToken());
-                    headers.put("Content-Type", "application/json");
-                    return headers;
-                }
-            };
-
-            queue.add(request);
-        } catch (JSONException e) {
-            Log.e(TAG, "FCM 메시지 생성 실패", e);
-        }
-    }
-
-    private String getAccessToken() {
-        return "your_access_token";
-    }
-
     private void initializeMessageListener() {
         databaseReference.child("chatRooms")
                 .child(roomId)
@@ -246,15 +225,6 @@ public class ChattingWindowFragment extends Fragment {
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {}
                 });
-    }
-
-    private void updateMessageStatus(String messageId) {
-        databaseReference.child("chats")
-                .child(roomId)
-                .child("messages")
-                .child(messageId)
-                .child("checked")
-                .setValue(true);
     }
 
     @Override

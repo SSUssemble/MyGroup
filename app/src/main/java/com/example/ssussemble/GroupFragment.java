@@ -156,12 +156,13 @@ public class GroupFragment extends Fragment {
     private void createGroupChatRoom(ArrayList<String> participants) {
         String currentUserEmail = MainActivity.Login_id.replace(".", "_dot_").replace("@", "_at_");
         String roomId = "group_" + System.currentTimeMillis();
+        String roomName = "그룹 채팅방 " + participants.size() + "명";
 
         Map<String, Object> roomData = new HashMap<>();
         Map<String, Boolean> participantsMap = new HashMap<>();
 
+        // 참가자 정보 설정
         participantsMap.put(currentUserEmail, true);
-
         for (String participantEmail : participants) {
             String participantEmailKey = participantEmail.replace(".", "_dot_").replace("@", "_at_");
             participantsMap.put(participantEmailKey, true);
@@ -170,20 +171,15 @@ public class GroupFragment extends Fragment {
         roomData.put("type", "group");
         roomData.put("participants", participantsMap);
         roomData.put("created_at", ServerValue.TIMESTAMP);
-        roomData.put("name", "그룹 채팅방 " + participants.size() + "명");
+        roomData.put("name", roomName);
 
+        // chatRooms에만 저장
         databaseReference.child("chatRooms").child(roomId)
                 .setValue(roomData)
                 .addOnSuccessListener(aVoid -> {
                     Log.d(TAG, "그룹 채팅방 생성 성공");
                     if (isAdded()) {
-                        navigateToChatRoom(roomId);
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "그룹 채팅방 생성 실패", e);
-                    if (isAdded()) {
-                        Toast.makeText(getContext(), "채팅방 생성에 실패했습니다.", Toast.LENGTH_SHORT).show();
+                        navigateToChatRoom(roomId);  // roomId를 전달
                     }
                 });
     }
@@ -255,33 +251,33 @@ public class GroupFragment extends Fragment {
 
     private void loadChatRooms() {
         String currentUserEmail = MainActivity.Login_id.replace(".", "_dot_").replace("@", "_at_");
-
         databaseReference.child("chatRooms")
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         chattingRoomList.clear();
-
                         for (DataSnapshot roomSnapshot : snapshot.getChildren()) {
                             try {
                                 DataSnapshot participantsSnapshot = roomSnapshot.child("participants");
-
                                 if (!participantsSnapshot.hasChild(currentUserEmail)) {
                                     continue;
                                 }
 
-                                String roomId = roomSnapshot.getKey();
                                 String type = roomSnapshot.child("type").getValue(String.class);
+                                if ("sub".equals(type)) {
+                                    continue;
+                                }
 
+                                String roomId = roomSnapshot.getKey();
                                 ChatRoomInfo chatRoom = new ChatRoomInfo();
                                 chatRoom.Chatting_room_id = roomId;
 
                                 if ("group".equals(type)) {
                                     chatRoom.isthis_chatroom_group = true;
                                     chatRoom.group_id = new ArrayList<>();
-
                                     if (roomSnapshot.child("name").exists()) {
-                                        chatRoom.Chatting_room_id = roomSnapshot.child("name").getValue(String.class);
+                                        chatRoom.Chatting_room_id = roomId;
+                                        String roomName = roomSnapshot.child("name").getValue(String.class);
                                     }
 
                                     for (DataSnapshot participantSnapshot : participantsSnapshot.getChildren()) {
@@ -294,7 +290,6 @@ public class GroupFragment extends Fragment {
                                 } else {
                                     chatRoom.isthis_chatroom_group = false;
                                     chatRoom.id1 = MainActivity.Login_id;
-
                                     for (DataSnapshot participantSnapshot : participantsSnapshot.getChildren()) {
                                         String participantEmail = participantSnapshot.getKey()
                                                 .replace("_dot_", ".")
@@ -323,33 +318,10 @@ public class GroupFragment extends Fragment {
                 });
     }
 
-    private void loadParticipantEmail(String uid, ChatRoomInfo chatRoom) {
-        databaseReference.child("users").child(uid).child("email")
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        String email = snapshot.getValue(String.class);
-                        if (email != null) {
-                            if (chatRoom.isthis_chatroom_group) {
-                                chatRoom.group_id.add(email);
-                            } else {
-                                chatRoom.id2 = email;
-                            }
-                            adapter.notifyDataSetChanged();
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        Log.e(TAG, "Failed to load participant email", error.toException());
-                    }
-                });
-    }
-
     private void setupLastMessageListener(ChatRoomInfo chatRoom) {
-        databaseReference.child("chats")
+        databaseReference.child("chatRooms")
                 .child(chatRoom.Chatting_room_id)
-                .child("messages")
+                .child("chats")
                 .limitToLast(1)
                 .addValueEventListener(new ValueEventListener() {
                     @Override
@@ -360,11 +332,8 @@ public class GroupFragment extends Fragment {
                                 if (chatData != null) {
                                     chatRoom.last_message = chatData.getMessage();
                                     chatRoom.last_message_id = chatData.getUserName();
-
                                     SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.getDefault());
-                                    sdf.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
                                     chatRoom.last_message_time = sdf.format(new Date(chatData.getTimestamp()));
-
                                     adapter.notifyDataSetChanged();
                                 }
                             }

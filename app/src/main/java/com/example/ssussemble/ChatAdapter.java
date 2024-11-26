@@ -85,7 +85,6 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             messageText.setText(chat.getMessage());
             if (chat.getTimestamp() != 0) {
                 SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.getDefault());
-                sdf.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
                 timeText.setText(sdf.format(new Date(chat.getTimestamp())));
             }
         }

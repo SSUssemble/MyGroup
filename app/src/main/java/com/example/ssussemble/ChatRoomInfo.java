@@ -11,6 +11,7 @@ public class ChatRoomInfo implements Serializable {
     String id1;
     String id2;
     String Chatting_room_id;
+    String Chatting_room_name;
     String last_message_time;
     String last_message;
     String last_message_id;
