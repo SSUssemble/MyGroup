@@ -1,8 +1,17 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.SSUSSEMBLE" parent="Theme.Material3.DayNight.NoActionBar">
-    </style>
+        <item name="colorPrimary">@color/white</item>
+        <item name="colorPrimaryVariant">@color/white</item>
+        <item name="colorOnPrimary">@color/white</item>
 
+        <item name="colorSecondary">@color/cardview_light_background</item>
+        <item name="colorSecondaryVariant">@color/white</item>
+        <item name="colorOnSecondary">@color/white</item>
+    </style>
+    <style name="BackgrounColor"><item name="android:background">@color/white</item></style>
+    <style name="itemColor"><item name="android:background">@color/dark_white</item></style>
+    <style name="textColor"><item name="android:background">@color/black</item></style>
     <style name="ToolbarTheme" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="android:fontFamily">@font/esamanru_bold</item>
         <item name="android:textSize">30dp</item>
