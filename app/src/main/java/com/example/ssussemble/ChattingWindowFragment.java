@@ -77,7 +77,6 @@ public class ChattingWindowFragment extends Fragment {
                 return false;
             });
 
-            // NavigationView 설정
             binding.navigationView.setNavigationItemSelectedListener(item -> {
                 int itemId = item.getItemId();
                 if (itemId == R.id.menu_drawer_time) {
