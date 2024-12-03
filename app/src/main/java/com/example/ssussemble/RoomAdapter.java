@@ -83,6 +83,8 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.RoomViewHolder
         this.roomList = roomList;
     }
 
+
+
     @NonNull
     @Override
     public RoomViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -90,11 +92,15 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.RoomViewHolder
         return new RoomViewHolder(view);
     }
 
+
+
     @Override
     public void onBindViewHolder(@NonNull RoomViewHolder holder, int position) {
         Room room = roomList.get(position);
         holder.roomName.setText(room.getName());
         holder.roomDescription.setText(room.getDescription());
+        holder.roomHeader.setText(room.getHeader());
+        holder.roomUserNumMax.setText(room.getUserNumMax());
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -119,11 +125,16 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.RoomViewHolder
     public static class RoomViewHolder extends RecyclerView.ViewHolder {
         TextView roomName;
         TextView roomDescription;
+        TextView roomHeader;
+        TextView roomUserNumMax;
 
         public RoomViewHolder(@NonNull View itemView) {
             super(itemView);
             roomName = itemView.findViewById(R.id.buttonName);
             roomDescription = itemView.findViewById(R.id.textView);
+            roomHeader = itemView.findViewById(R.id.header_name);
+            roomUserNumMax = itemView.findViewById(R.id.max_user_num);
         }
     }
 }
+

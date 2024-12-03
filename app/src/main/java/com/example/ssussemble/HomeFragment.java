@@ -98,7 +98,6 @@ public class HomeFragment extends Fragment {
                 }
                 roomAdapter.notifyDataSetChanged();
             }
-
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
 

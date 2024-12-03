@@ -1,6 +1,7 @@
 package com.example.ssussemble;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,10 +20,14 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 public class CreateRoomFragment extends Fragment {
-    public String selectedOption;public String groupName;
+    public String selectedOption;
+    public String header;
+    public EditText comment;
     private EditText editTextRoomName;
     private Spinner spinnerRoomDescription;
     private DatabaseReference databaseReference;
+    public EditText userNum;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -30,6 +35,9 @@ public class CreateRoomFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_create_room, container, false);
         editTextRoomName = view.findViewById(R.id.editTextText);
         spinnerRoomDescription = view.findViewById(R.id.spinner);
+
+        comment = view.findViewById(R.id.editTextText2);
+        userNum = view.findViewById(R.id.editTextNumberDecimal);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(),
                 R.array.options, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -48,15 +56,21 @@ public class CreateRoomFragment extends Fragment {
                 // 선택이 취소되었을 때의 동작
             }
         });
+
+        //header setting
+        header = "윤찬호";
         Button buttonCreateRoom = view.findViewById(R.id.button2);
 
         databaseReference = FirebaseDatabase.getInstance().getReference("rooms");
         buttonCreateRoom.setOnClickListener(view1 -> {
             String roomName = editTextRoomName.getText().toString();
             String roomDescription = selectedOption;
-
             String roomId = databaseReference.push().getKey();
-            Room room = new Room(roomId, roomName, roomDescription);
+            String roomComment = comment.getText().toString();
+            String roomUserNum = userNum.getText().toString();
+            Log.d("CreateRoomFragment", "Generated roomId: " + roomId);
+            Room room = new Room(roomId, roomName, roomDescription, roomComment, roomUserNum,header);
+            assert roomId != null;
             databaseReference.child(roomId).setValue(room);
 
             getParentFragmentManager().popBackStack();
