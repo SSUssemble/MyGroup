@@ -8,6 +8,8 @@ public class UserData {
     private String displayName;
     private long createdAt;
     private String profileImageUrl;
+    private String department;
+    private String grade;
 
     public UserData() {
     }
@@ -17,6 +19,8 @@ public class UserData {
         this.email = user.getEmail();
         this.displayName = user.getDisplayName();
         this.createdAt = System.currentTimeMillis();
+        this.department = "";
+        this.grade = "";
         if (user.getPhotoUrl() != null) {
             this.profileImageUrl = user.getPhotoUrl().toString();
         }
@@ -60,5 +64,21 @@ public class UserData {
 
     public void setProfileImageUrl(String profileImageUrl) {
         this.profileImageUrl = profileImageUrl;
+    }
+
+    public String getDepartment() {
+        return department;
+    }
+
+    public void setDepartment(String department) {
+        this.department = department;
+    }
+
+    public String getGrade() {
+        return grade;
+    }
+
+    public void setGrade(String grade) {
+        this.grade = grade;
     }
 }

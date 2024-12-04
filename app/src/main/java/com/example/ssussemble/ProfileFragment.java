@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import androidx.annotation.*;
 import androidx.fragment.app.Fragment;
@@ -19,6 +20,12 @@ import androidx.fragment.app.Fragment;
 import com.bumptech.glide.Glide;
 import com.example.ssussemble.databinding.FragmentProfileBinding;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -57,15 +64,46 @@ public class ProfileFragment extends Fragment {
             }
         });
 
-        loadProfileImage();
 
-        mAuth = FirebaseAuth.getInstance();
-        if (mAuth.getCurrentUser() != null) {
-            String currentUserEmail = mAuth.getCurrentUser().getEmail();
-            binding.userEmail.setText(currentUserEmail);
-        }
+        loadProfileImage();
+        loadUserInfo();
+
 
         return view;
+    }
+
+    private void loadUserInfo() {
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser != null) {
+            DatabaseReference userRef = FirebaseDatabase.getInstance()
+                    .getReference("users")
+                    .child(currentUser.getUid());
+
+            mAuth = FirebaseAuth.getInstance();
+            if (mAuth.getCurrentUser() != null) {
+                String currentUserEmail = mAuth.getCurrentUser().getEmail();
+                binding.userEmail.setText(currentUserEmail);
+            }
+
+            userRef.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    UserData userData = snapshot.getValue(UserData.class);
+                    if (userData != null) {
+                        String department = userData.getDepartment() + " " + userData.getGrade() + "학년";
+                        binding.userName.setText(userData.getDisplayName());
+                        binding.userDepartment.setText(department);
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Toast.makeText(requireContext(),
+                            "사용자 정보 로드 실패",
+                            Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
     }
 
     private void loadProfileImage() {
