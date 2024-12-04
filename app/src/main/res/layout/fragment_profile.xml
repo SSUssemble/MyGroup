@@ -79,7 +79,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <TextView
+        <EditText
             android:id="@+id/userDepartment"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -89,7 +89,7 @@
             android:layout_marginStart="10dp"
             android:layout_marginTop="-40dp"/>
 
-        <TextView
+        <EditText
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="같이 참여하고 있는 그룹: 1"
@@ -119,17 +119,16 @@
         android:gravity="center"/>
 
     <ScrollView
-        android:id="@+id/mainscroll"
+        android:id="@+id/mainScroll"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/classScheduleMaker">
+        app:layout_constraintTop_toBottomOf="@id/classScheduleMaker">
 
         <TableLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="16dp"
-            app:layout_constraintTop_toBottomOf="@id/classScheduleMaker">
+            android:padding="16dp">
 
             <TableRow
                 android:layout_width="match_parent"

@@ -4,4 +4,11 @@
     <string name="drawer_open">내비게이션 열기</string>
     <string name="drawer_close">내비게이션 닫기</string>
     <string name="msg_token_fmt">FCM 토큰: %s</string>
+
+    <string-array name="options">
+        <item>팀플</item>
+        <item>공모전</item>
+        <item>기타</item>
+    </string-array>
+
 </resources>
