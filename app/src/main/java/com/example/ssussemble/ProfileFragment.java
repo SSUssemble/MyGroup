@@ -25,7 +25,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-// 임시로 로그아웃 버튼 추가해놓음
 public class ProfileFragment extends Fragment {
     private FirebaseAuth mAuth;
     private Button logoutButton; // 추가
@@ -35,18 +34,6 @@ public class ProfileFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-//        View view = inflater.inflate(R.layout.fragment_profile, container, false);
-//
-//        mAuth = FirebaseAuth.getInstance();
-//
-//        logoutButton = new Button(requireContext());
-//        logoutButton.setText("로그아웃");
-//        logoutButton.setOnClickListener(v -> performLogout());
-//
-//        LinearLayout layout = view.findViewById(R.id.profileLayout);
-//        layout.addView(logoutButton);
-//
-//        return view;
         binding = FragmentProfileBinding.inflate(inflater, container, false);
         View view = binding.getRoot();
 
@@ -71,6 +58,12 @@ public class ProfileFragment extends Fragment {
         });
 
         loadProfileImage();
+
+        mAuth = FirebaseAuth.getInstance();
+        if (mAuth.getCurrentUser() != null) {
+            String currentUserEmail = mAuth.getCurrentUser().getEmail();
+            binding.userEmail.setText(currentUserEmail);
+        }
 
         return view;
     }
@@ -101,13 +94,6 @@ public class ProfileFragment extends Fragment {
         startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
     }
 
-    private void loadImage(String url) {
-        Glide.with(this)
-                .load(url)
-                .placeholder(R.drawable.default_profile)
-                .circleCrop()
-                .into(binding.profileImageView);
-    }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {

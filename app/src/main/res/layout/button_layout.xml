@@ -14,9 +14,10 @@
         android:id="@+id/buttonName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="사인페 팀플 모집"
+        android:text="방 이름"
+        android:layout_marginLeft="15dp"
         android:textSize="15dp"
-        android:textStyle="bold"
+        android:theme="@style/MediumFont"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -26,6 +27,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
         android:orientation="horizontal"
+        android:theme="@style/LightFont"
         app:layout_constraintEnd_toEndOf="parent">
 
         <TextView
@@ -67,7 +69,8 @@
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="팀플"
+        android:text="카테고리"
+        android:theme="@style/LightFont"
         app:layout_constraintStart_toStartOf="@+id/buttonName"
         app:layout_constraintTop_toBottomOf="@+id/buttonName" />
 
@@ -75,7 +78,8 @@
         android:id="@+id/header_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="윤찬호"
+        android:text="사용자명"
+        android:theme="@style/LightFont"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintRight_toRightOf="@+id/button"

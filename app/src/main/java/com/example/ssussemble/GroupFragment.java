@@ -50,7 +50,7 @@ public class GroupFragment extends Fragment {
 
     private void setupToolbar(View view) {
         toolbar = view.findViewById(R.id.toolbar);
-        toolbar.setTitleTextAppearance(getContext(), R.style.ToolbarTheme);
+        toolbar.setTitleTextAppearance(getContext(), R.style.BoldFont);
 
         toolbar.inflateMenu(R.menu.menu_group);
         toolbar.setOnMenuItemClickListener(item -> {

@@ -7,21 +7,19 @@
     android:layout_height="match_parent"
     tools:context=".GroupFragment">
 
-    <!-- Toolbar for the title "채팅" -->
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="0dp"
         android:layout_height="?attr/actionBarSize"
         android:background="#1E4174"
         android:elevation="4dp"
-        android:theme="@style/ToolbarTheme"
+        android:theme="@style/BoldFont"
         app:title="채팅"
         app:titleTextColor="#DDA94B"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- RecyclerView for the chat room list -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewChatRooms"
         android:layout_width="408dp"

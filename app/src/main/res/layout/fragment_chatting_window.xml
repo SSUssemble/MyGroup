@@ -15,7 +15,7 @@
             android:layout_height="50dp"
             android:background="#00587C"
             android:minHeight="?attr/actionBarSize"
-            android:theme="@style/ToolbarTheme"
+            android:theme="@style/BoldFont"
             app:menu="@menu/menu_chatting_window"
             app:titleTextColor="@android:color/white"
             app:layout_constraintEnd_toEndOf="parent"
@@ -86,5 +86,5 @@
         android:layout_gravity="right"
         app:headerLayout="@layout/navigation_header"
         app:menu="@menu/menu_drawer"
-        android:theme="@style/DrawerTheme"/>
+        android:theme="@style/MediumFont"/>
 </androidx.drawerlayout.widget.DrawerLayout>
