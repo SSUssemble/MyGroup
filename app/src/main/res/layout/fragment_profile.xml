@@ -59,6 +59,7 @@
         android:textSize="20sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="10dp"
         android:padding="1dp"
         tools:ignore="MissingConstraints" />
 

@@ -107,7 +107,7 @@ public class CreateRoomFragment extends Fragment {
 
                 databaseReference.child(roomId).setValue(room)
                         .addOnSuccessListener(aVoid -> {
-                            createChatRoom(roomId, roomName, leaderEmail);
+                            createChatRoom(roomId, roomName, leaderNickname);
                         })
                         .addOnFailureListener(e -> {
                             Toast.makeText(requireContext(), "방 생성 실패", Toast.LENGTH_SHORT).show();
@@ -130,6 +130,8 @@ public class CreateRoomFragment extends Fragment {
         participants.put(leaderNickname, true);
         chatRoomMap.put("participants", participants);
         chatRoomMap.put("created_at", ServerValue.TIMESTAMP);
+
+        databaseReference.child(roomId).child("participants").child(leaderNickname).setValue(true);
 
         chatRoomsRef.child(roomId).setValue(chatRoomMap)
                 .addOnSuccessListener(aVoid -> {

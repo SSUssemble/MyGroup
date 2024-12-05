@@ -7,7 +7,6 @@ public class Room {
     private String comment;
     private String  userNumMax;
     private String header;
-
     public Room(){
 
     }

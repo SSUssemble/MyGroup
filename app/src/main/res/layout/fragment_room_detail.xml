@@ -23,13 +23,6 @@
         android:theme="@style/LightFont"
         android:textSize="16sp" />
 
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:src="@drawable/room_image_sample"
-        android:layout_marginTop="20dp"
-        android:adjustViewBounds="true"/>
-
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -46,7 +39,7 @@
             android:id="@+id/textViewRoomComment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="방 설명"
+            android:text="그룹 설명"
             android:theme="@style/LightFont"
             android:textSize="16sp" />
     </ScrollView>
@@ -71,7 +64,7 @@
             android:id="@+id/exitRoom"
             android:layout_width="180dp"
             android:layout_height="wrap_content"
-            android:text="방 나가기"
+            android:text="그룹 나가기"
             android:layout_gravity="right"
             android:theme="@style/MediumFont"
             android:layout_marginLeft="20dp"

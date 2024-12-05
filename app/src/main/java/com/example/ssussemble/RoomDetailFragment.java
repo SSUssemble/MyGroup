@@ -72,49 +72,67 @@ public class RoomDetailFragment extends Fragment {
             textViewRoomComment.setText(roomComment);
 
             exitRoomButton.setOnClickListener(view1 -> {
-                Log.d(TAG, "exitRoomButton clicked");
+                String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                DatabaseReference userRef = FirebaseDatabase.getInstance()
+                        .getReference("users")
+                        .child(currentUserId);
 
-                // 해당 방의 데이터베이스 삭제
-                if (roomId != null) {
-                    databaseReference.child(roomId).removeValue()
-                            .addOnSuccessListener(aVoid -> {
-                                Log.d(TAG, "Room deletion successful");
-                                Toast.makeText(getContext(), "방이 삭제되었습니다.", Toast.LENGTH_SHORT).show();
-                                // 현재 프래그먼트 닫기
-                                getParentFragmentManager().popBackStack();
-                            })
-                            .addOnFailureListener(e -> {
-                                Log.e(TAG, "Room deletion failed", e);
-                                Toast.makeText(getContext(), "방 삭제에 실패했습니다.", Toast.LENGTH_SHORT).show();
-                            });
-                } else {
-                    databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                            for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                                Room room = snapshot.getValue(Room.class);
-                                if (room != null && roomName.equals(room.getName()) && roomDescription.equals(room.getDescription())) {
-                                    snapshot.getRef().removeValue().addOnSuccessListener(aVoid -> {
-                                        Log.d(TAG, "Room deletion successful");
-                                        Toast.makeText(getContext(), "방이 삭제되었습니다.", Toast.LENGTH_SHORT).show();
-                                        getParentFragmentManager().popBackStack();
-                                    }).addOnFailureListener(e -> {
-                                        Log.e(TAG, "Room deletion failed", e);
-                                        Toast.makeText(getContext(), "방 삭제에 실패했습니다.", Toast.LENGTH_SHORT).show();
-                                    });
-                                    break;
-                                    // 일치하는 항목을 찾으면 반복문 종료
+                userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot userSnapshot) {
+                        String userNickname = userSnapshot.child("displayName").getValue(String.class);
+
+                        // 방의 정보를 가져와서 방장인지 확인
+                        databaseReference.child(roomId).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot roomSnapshot) {
+                                String header = roomSnapshot.child("header").getValue(String.class);
+
+                                if (userNickname.equals(header)) {
+                                    // 방장인 경우 방 삭제
+                                    databaseReference.child(roomId).removeValue()
+                                            .addOnSuccessListener(aVoid -> {
+                                                // 채팅방도 삭제
+                                                FirebaseDatabase.getInstance()
+                                                        .getReference("chatRooms")
+                                                        .child(roomId)
+                                                        .removeValue();
+
+                                                Toast.makeText(getContext(), "방이 삭제되었습니다.", Toast.LENGTH_SHORT).show();
+                                                getParentFragmentManager().popBackStack();
+                                            });
+                                } else {
+                                    // 일반 참가자인 경우 참가자 목록에서만 제거
+                                    databaseReference.child(roomId).child("participants")
+                                            .child(userNickname)
+                                            .removeValue()
+                                            .addOnSuccessListener(aVoid -> {
+                                                // 채팅방의 participants에서도 제거
+                                                FirebaseDatabase.getInstance()
+                                                        .getReference("chatRooms")
+                                                        .child(roomId)
+                                                        .child("participants")
+                                                        .child(userNickname)
+                                                        .removeValue();
+
+                                                Toast.makeText(getContext(), "그룹에서 나갔습니다.", Toast.LENGTH_SHORT).show();
+                                                getParentFragmentManager().popBackStack();
+                                            });
                                 }
                             }
-                        }
 
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
-                            Log.e(TAG, "Database error: " + databaseError.getMessage());
-                            Toast.makeText(getContext(), "데이터베이스 오류 발생", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                }
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+                                Log.e(TAG, "Database error: " + error.getMessage());
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Log.e(TAG, "Database error: " + error.getMessage());
+                    }
+                });
             });
         } else {
             Log.e(TAG, "Arguments are null");

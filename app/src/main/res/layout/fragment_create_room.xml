@@ -55,6 +55,7 @@
             android:layout_height="57dp"
             android:theme="@style/LightFont"
             android:ems="10"
+            android:hint="최대 인원 입력"
             android:inputType="numberDecimal" />
     </LinearLayout>
 
@@ -82,6 +83,4 @@
         android:theme="@style/LightFont"
         android:text="방 만들기" />
 
-
-    <!-- 다른 필요한 뷰 요소들을 여기에 추가 -->
 </LinearLayout>
