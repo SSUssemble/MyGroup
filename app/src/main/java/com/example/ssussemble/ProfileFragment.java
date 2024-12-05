@@ -6,12 +6,14 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.*;
@@ -34,17 +36,20 @@ import java.io.InputStream;
 
 public class ProfileFragment extends Fragment {
     private FirebaseAuth mAuth;
-    private Button logoutButton; // 추가
     private static final int PICK_IMAGE_REQUEST = 1;
     private ImageView profileImageView;
     private FragmentProfileBinding binding;
+    private TextView groupCountText;
+    private DatabaseReference databaseReference;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentProfileBinding.inflate(inflater, container, false);
         View view = binding.getRoot();
 
+        groupCountText = view.findViewById(R.id.groupCount);
         profileImageView = binding.profileImageView;
+        databaseReference = FirebaseDatabase.getInstance().getReference();
 
         // Handle profile image click
         profileImageView.setOnClickListener(new View.OnClickListener() {
@@ -67,10 +72,61 @@ public class ProfileFragment extends Fragment {
 
         loadProfileImage();
         loadUserInfo();
+        setupNotificationButton();
 
+        loadGroupCount();
+        setupGroupClickListener();
 
         return view;
     }
+
+    private void loadGroupCount() {
+        String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        DatabaseReference userRef = databaseReference.child("users").child(currentUserId);
+
+        userRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot userSnapshot) {
+                String userNickname = userSnapshot.child("displayName").getValue(String.class);
+
+                databaseReference.child("rooms").addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        int groupCount = 0;
+                        for (DataSnapshot roomSnapshot : snapshot.getChildren()) {
+                            if (roomSnapshot.child("participants").hasChild(userNickname) ||
+                                    userNickname.equals(roomSnapshot.child("header").getValue(String.class))) {
+                                groupCount++;
+                            }
+                        }
+                        groupCountText.setText("내가 참가한 그룹 : " + groupCount);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Log.e("ProfileFragment", "그룹 수 로드 실패", error.toException());
+                    }
+                });
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("ProfileFragment", "사용자 정보 로드 실패", error.toException());
+            }
+        });
+    }
+
+    private void setupGroupClickListener() {
+        groupCountText.setOnClickListener(v -> {
+            Fragment myGroupsFragment = new MyGroupsFragment();
+            requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragment_container, myGroupsFragment)
+                    .addToBackStack(null)
+                    .commit();
+        });
+    }
+
 
     private void loadUserInfo() {
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -104,6 +160,17 @@ public class ProfileFragment extends Fragment {
                 }
             });
         }
+    }
+
+    private void setupNotificationButton() {
+        binding.notificationButton.setOnClickListener(v -> {
+            Fragment requestsFragment = new RequestsFragment();
+            requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragment_container, requestsFragment)
+                    .addToBackStack(null)
+                    .commit();
+        });
     }
 
     private void loadProfileImage() {

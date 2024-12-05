@@ -1,7 +1,6 @@
 package com.example.ssussemble;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,69 +15,129 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class CreateRoomFragment extends Fragment {
+    private FirebaseAuth mAuth;
+    private DatabaseReference databaseReference;
+    private DatabaseReference chatRoomsRef;
     public String selectedOption;
     public String header;
     public EditText comment;
     private EditText editTextRoomName;
     private Spinner spinnerRoomDescription;
-    private DatabaseReference databaseReference;
     public EditText userNum;
 
-    @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        // 레이아웃을 확장하여 프래그먼트의 뷰를 만듭니다.
         View view = inflater.inflate(R.layout.fragment_create_room, container, false);
-        editTextRoomName = view.findViewById(R.id.editTextText);
-        spinnerRoomDescription = view.findViewById(R.id.spinner);
 
-        comment = view.findViewById(R.id.editTextText2);
+        initializeFirebase();
+        initializeViews(view);
+        setupSpinner();
+
+        Button buttonCreateRoom = view.findViewById(R.id.button2);
+        buttonCreateRoom.setOnClickListener(v -> createRoomAndChat());
+
+        return view;
+    }
+
+    private void initializeFirebase() {
+        mAuth = FirebaseAuth.getInstance();
+        databaseReference = FirebaseDatabase.getInstance().getReference("rooms");
+        chatRoomsRef = FirebaseDatabase.getInstance().getReference("chatRooms");
+    }
+
+    private void initializeViews(View view) {
+        editTextRoomName = view.findViewById(R.id.roomName);
+        spinnerRoomDescription = view.findViewById(R.id.spinner);
+        comment = view.findViewById(R.id.roomComment);
         userNum = view.findViewById(R.id.editTextNumberDecimal);
+    }
+
+    private void setupSpinner() {
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(),
                 R.array.options, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerRoomDescription.setAdapter(adapter);
 
-        // Spinner 이벤트 리스너 설정
         spinnerRoomDescription.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 selectedOption = parent.getItemAtPosition(position).toString();
-                Toast.makeText(getContext(), "Selected: " + selectedOption, Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                // 선택이 취소되었을 때의 동작
             }
         });
-
-        //header setting
-        header = "윤찬호";
-        Button buttonCreateRoom = view.findViewById(R.id.button2);
-
-        databaseReference = FirebaseDatabase.getInstance().getReference("rooms");
-        buttonCreateRoom.setOnClickListener(view1 -> {
-            String roomName = editTextRoomName.getText().toString();
-            String roomDescription = selectedOption;
-            String roomId = databaseReference.push().getKey();
-            String roomComment = comment.getText().toString();
-            String roomUserNum = userNum.getText().toString();
-            Log.d("CreateRoomFragment", "Generated roomId: " + roomId);
-            Room room = new Room(roomId, roomName, roomDescription, roomComment, roomUserNum,header);
-            assert roomId != null;
-            databaseReference.child(roomId).setValue(room);
-
-            getParentFragmentManager().popBackStack();
-        });
-
-        return view;
     }
-    public String getEditTextValue(EditText editText) {
-        return editText != null ? editText.getText().toString():"";
+
+    private void createRoomAndChat() {
+        String roomName = editTextRoomName.getText().toString();
+        String roomDescription = selectedOption;
+        String roomComment = comment.getText().toString();
+        String roomUserNum = userNum.getText().toString();
+        String leaderEmail = MainActivity.Login_id.replace(".", "_dot_").replace("@", "_at_");
+
+        DatabaseReference userRef = FirebaseDatabase.getInstance()
+                .getReference("users")
+                .child(FirebaseAuth.getInstance().getCurrentUser().getUid());
+
+        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot userSnapshot) {
+                String leaderNickname = userSnapshot.child("displayName").getValue(String.class);
+
+                String roomId = databaseReference.push().getKey();
+
+
+                Room room = new Room(roomId, roomName, roomDescription, roomComment, roomUserNum, leaderEmail);
+                room.setHeader(leaderNickname);
+                room.setDescription(roomDescription);
+
+                databaseReference.child(roomId).setValue(room)
+                        .addOnSuccessListener(aVoid -> {
+                            createChatRoom(roomId, roomName, leaderEmail);
+                        })
+                        .addOnFailureListener(e -> {
+                            Toast.makeText(requireContext(), "방 생성 실패", Toast.LENGTH_SHORT).show();
+                        });
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(requireContext(), "사용자 정보 로드 실패", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void createChatRoom(String roomId, String roomName, String leaderNickname) {
+        Map<String, Object> chatRoomMap = new HashMap<>();
+        chatRoomMap.put("name", roomName);
+        chatRoomMap.put("type", "group");
+
+        Map<String, Boolean> participants = new HashMap<>();
+        participants.put(leaderNickname, true);
+        chatRoomMap.put("participants", participants);
+        chatRoomMap.put("created_at", ServerValue.TIMESTAMP);
+
+        chatRoomsRef.child(roomId).setValue(chatRoomMap)
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(requireContext(), "방 생성 완료", Toast.LENGTH_SHORT).show();
+                    getParentFragmentManager().popBackStack();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(requireContext(), "채팅방 생성 실패", Toast.LENGTH_SHORT).show();
+                });
     }
 }

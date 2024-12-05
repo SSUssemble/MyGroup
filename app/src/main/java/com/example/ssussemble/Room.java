@@ -38,4 +38,28 @@ public class Room {
     public String getDescription() {
         return description;
     }
+
+    public void setComment(String comment){
+        this.comment = comment;
+    }
+
+    public void setUserNumMax(String userNumMax){
+        this.userNumMax = userNumMax;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setHeader(String header) {
+        this.header = header;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }

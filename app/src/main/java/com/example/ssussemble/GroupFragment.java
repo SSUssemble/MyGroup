@@ -17,6 +17,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 import androidx.appcompat.widget.Toolbar;
+
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.*;
 
 import java.text.SimpleDateFormat;
@@ -139,7 +141,6 @@ public class GroupFragment extends Fragment {
                                         }
                                     });
                         } else {
-                            // 이미 존재하는 채팅방으로 이동
                             if (isAdded()) {
                                 navigateToChatRoom(roomId);
                             }
@@ -155,33 +156,60 @@ public class GroupFragment extends Fragment {
 
     private void createGroupChatRoom(ArrayList<String> participants) {
         String currentUserEmail = MainActivity.Login_id.replace(".", "_dot_").replace("@", "_at_");
-        String roomId = "group_" + System.currentTimeMillis();
-        String roomName = "그룹 채팅방 " + participants.size() + "명";
 
-        Map<String, Object> roomData = new HashMap<>();
-        Map<String, Boolean> participantsMap = new HashMap<>();
+        DatabaseReference userRef = FirebaseDatabase.getInstance()
+                .getReference("users")
+                .child(currentUserEmail);
 
-        // 참가자 정보 설정
-        participantsMap.put(currentUserEmail, true);
-        for (String participantEmail : participants) {
-            String participantEmailKey = participantEmail.replace(".", "_dot_").replace("@", "_at_");
-            participantsMap.put(participantEmailKey, true);
-        }
+        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                String currentUserNickname = snapshot.child("displayName").getValue(String.class);
+                String roomId = "group_" + System.currentTimeMillis();
+                String roomName = "그룹 채팅방 " + participants.size() + "명";
 
-        roomData.put("type", "group");
-        roomData.put("participants", participantsMap);
-        roomData.put("created_at", ServerValue.TIMESTAMP);
-        roomData.put("name", roomName);
+                Map<String, Object> roomData = new HashMap<>();
+                Map<String, Boolean> participantsMap = new HashMap<>();
 
-        // chatRooms에만 저장
-        databaseReference.child("chatRooms").child(roomId)
-                .setValue(roomData)
-                .addOnSuccessListener(aVoid -> {
-                    Log.d(TAG, "그룹 채팅방 생성 성공");
-                    if (isAdded()) {
-                        navigateToChatRoom(roomId);  // roomId를 전달
-                    }
-                });
+                participantsMap.put(currentUserNickname, true);
+
+                for (String participantEmail : participants) {
+                    String participantId = participantEmail.replace(".", "_dot_").replace("@", "_at_");
+                    DatabaseReference participantRef = FirebaseDatabase.getInstance()
+                            .getReference("users")
+                            .child(participantId);
+
+                    participantRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot participantSnapshot) {
+                            String participantNickname = participantSnapshot.child("displayName").getValue(String.class);
+                            participantsMap.put(participantNickname, true);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+                            Log.e(TAG, "참가자 정보 로드 실패", error.toException());
+                        }
+                    });
+                }
+
+                roomData.put("type", "group");
+                roomData.put("participants", participantsMap);
+                roomData.put("created_at", ServerValue.TIMESTAMP);
+                roomData.put("name", roomName);
+
+                databaseReference.child("chatRooms").child(roomId)
+                        .setValue(roomData)
+                        .addOnSuccessListener(aVoid -> {
+                            navigateToChatRoom(roomId);
+                        });
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e(TAG, "사용자 정보 로드 실패", error.toException());
+            }
+        });
     }
 
     private void navigateToChatRoom(String roomId) {
@@ -250,62 +278,46 @@ public class GroupFragment extends Fragment {
     }
 
     private void loadChatRooms() {
-        String currentUserEmail = MainActivity.Login_id.replace(".", "_dot_").replace("@", "_at_");
-        databaseReference.child("chatRooms")
-                .addValueEventListener(new ValueEventListener() {
+        DatabaseReference userRef = FirebaseDatabase.getInstance()
+                .getReference("users")
+                .child(FirebaseAuth.getInstance().getCurrentUser().getUid());
+
+        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot userSnapshot) {
+                String currentUserNickname = userSnapshot.child("displayName").getValue(String.class);
+
+                databaseReference.child("chatRooms").addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         chattingRoomList.clear();
                         for (DataSnapshot roomSnapshot : snapshot.getChildren()) {
-                            try {
-                                DataSnapshot participantsSnapshot = roomSnapshot.child("participants");
-                                if (!participantsSnapshot.hasChild(currentUserEmail)) {
-                                    continue;
-                                }
-
-                                String type = roomSnapshot.child("type").getValue(String.class);
-                                if ("sub".equals(type)) {
-                                    continue;
-                                }
-
+                            DataSnapshot participantsSnapshot = roomSnapshot.child("participants");
+                            if (participantsSnapshot.hasChild(currentUserNickname)) {
                                 String roomId = roomSnapshot.getKey();
                                 ChatRoomInfo chatRoom = new ChatRoomInfo();
                                 chatRoom.Chatting_room_id = roomId;
 
-                                if ("group".equals(type)) {
+                                if (roomSnapshot.child("type").getValue(String.class).equals("group")) {
                                     chatRoom.isthis_chatroom_group = true;
                                     chatRoom.group_id = new ArrayList<>();
-                                    if (roomSnapshot.child("name").exists()) {
-                                        chatRoom.Chatting_room_id = roomId;
-                                        String roomName = roomSnapshot.child("name").getValue(String.class);
-                                    }
-
                                     for (DataSnapshot participantSnapshot : participantsSnapshot.getChildren()) {
-                                        String participantEmail = participantSnapshot.getKey()
-                                                .replace("_dot_", ".")
-                                                .replace("_at_", "@");
-                                        chatRoom.group_id.add(participantEmail);
+                                        chatRoom.group_id.add(participantSnapshot.getKey());
                                     }
-                                    chatRoom.bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_chat_room);
+                                    chatRoom.Chatting_room_id = roomSnapshot.child("name").getValue(String.class);
                                 } else {
                                     chatRoom.isthis_chatroom_group = false;
-                                    chatRoom.id1 = MainActivity.Login_id;
                                     for (DataSnapshot participantSnapshot : participantsSnapshot.getChildren()) {
-                                        String participantEmail = participantSnapshot.getKey()
-                                                .replace("_dot_", ".")
-                                                .replace("_at_", "@");
-                                        if (!participantEmail.equals(MainActivity.Login_id)) {
-                                            chatRoom.id2 = participantEmail;
+                                        String participantNickname = participantSnapshot.getKey();
+                                        if (!participantNickname.equals(currentUserNickname)) {
+                                            chatRoom.id2 = participantNickname;
                                             break;
                                         }
                                     }
-                                    chatRoom.bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_chat_room2);
                                 }
 
                                 chattingRoomList.add(chatRoom);
                                 setupLastMessageListener(chatRoom);
-                            } catch (Exception e) {
-                                Log.e(TAG, "채팅방 정보 처리 중 오류: " + e.getMessage());
                             }
                         }
                         adapter.notifyDataSetChanged();
@@ -316,6 +328,13 @@ public class GroupFragment extends Fragment {
                         Log.e(TAG, "채팅방 로드 실패", error.toException());
                     }
                 });
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e(TAG, "사용자 정보 로드 실패", error.toException());
+            }
+        });
     }
 
     private void setupLastMessageListener(ChatRoomInfo chatRoom) {
@@ -368,7 +387,6 @@ public class GroupFragment extends Fragment {
 
                     @Override
                     public void onLongClick(View view, int position) {
-                        // 필요한 경우 구현
                     }
                 }));
     }

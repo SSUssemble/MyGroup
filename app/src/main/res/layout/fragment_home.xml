@@ -39,6 +39,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:hint="검색"
+            android:theme="@style/MediumFont"
             android:padding="10dp" />
 
         <TextView
@@ -58,6 +59,7 @@
         android:layout_marginTop="4dp"
         android:padding="15dp"
         android:text=" + 방 생성하기"
+        android:theme="@style/MediumFont"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/search_bar"
 
