@@ -1,22 +1,22 @@
 {
   "project_info": {
-    "project_number": "999192052274",
-    "firebase_url": "https://ssussemble-default-rtdb.firebaseio.com",
-    "project_id": "ssussemble",
-    "storage_bucket": "ssussemble.firebasestorage.app"
+    "project_number": "1029958527697",
+    "firebase_url": "https://loginandregister-abe19-default-rtdb.firebaseio.com",
+    "project_id": "loginandregister-abe19",
+    "storage_bucket": "loginandregister-abe19.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:999192052274:android:baeb91f89a63b27572722b",
+        "mobilesdk_app_id": "1:1029958527697:android:ed398101741342ce5b73f0",
         "android_client_info": {
-          "package_name": "com.example.ssussemble"
+          "package_name": "com.example.tmp"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDCdihDfnhUR8uRPHNN-RFtG6SEB6h3G3w"
+          "current_key": "AIzaSyDrkyrOyAUaXfChLh3V-aKy-44tamL8n4E"
         }
       ],
       "services": {
