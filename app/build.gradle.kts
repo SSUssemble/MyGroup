@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.ssussemble"
+    namespace = "com.example.tmp"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.ssussemble"
+        applicationId = "com.example.tmp"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
