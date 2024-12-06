@@ -50,7 +50,6 @@ public class RoomDetailFragment extends Fragment {
         return fragment;
     }
 
-    @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_room_detail, container, false);
@@ -59,6 +58,7 @@ public class RoomDetailFragment extends Fragment {
         TextView textViewRoomDescription = view.findViewById(R.id.textViewRoomDescription);
         TextView textViewRoomComment = view.findViewById(R.id.textViewRoomComment);
         Button exitRoomButton = view.findViewById(R.id.exitRoom);
+        joinRequestButton = view.findViewById(R.id.joinRequestButton);
 
         databaseReference = FirebaseDatabase.getInstance().getReference("rooms");
 
@@ -67,78 +67,74 @@ public class RoomDetailFragment extends Fragment {
             roomName = getArguments().getString(ARG_ROOM_NAME);
             String roomDescription = getArguments().getString(ARG_ROOM_DESCRIPTION);
             String roomComment = getArguments().getString(ARG_ROOM_COMMENT);
+
             textViewRoomName.setText(roomName);
             textViewRoomDescription.setText(roomDescription);
             textViewRoomComment.setText(roomComment);
 
-            exitRoomButton.setOnClickListener(view1 -> {
-                String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-                DatabaseReference userRef = FirebaseDatabase.getInstance()
-                        .getReference("users")
-                        .child(currentUserId);
+            String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+            DatabaseReference userRef = FirebaseDatabase.getInstance()
+                    .getReference("users")
+                    .child(currentUserId);
 
-                userRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot userSnapshot) {
-                        String userNickname = userSnapshot.child("displayName").getValue(String.class);
+            userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot userSnapshot) {
+                    String userNickname = userSnapshot.child("displayName").getValue(String.class);
 
-                        // 방의 정보를 가져와서 방장인지 확인
-                        databaseReference.child(roomId).addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot roomSnapshot) {
-                                String header = roomSnapshot.child("header").getValue(String.class);
+                    databaseReference.child(roomId).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot roomSnapshot) {
+                            String header = roomSnapshot.child("header").getValue(String.class);
+                            boolean isLeader = userNickname.equals(header);
+                            boolean isParticipant = roomSnapshot.child("participants").hasChild(userNickname) || isLeader;
 
-                                if (userNickname.equals(header)) {
-                                    // 방장인 경우 방 삭제
+                            exitRoomButton.setEnabled(isParticipant);
+                            joinRequestButton.setEnabled(!isParticipant);
+
+                            exitRoomButton.setOnClickListener(view1 -> {
+                                if (isLeader) {
                                     databaseReference.child(roomId).removeValue()
                                             .addOnSuccessListener(aVoid -> {
-                                                // 채팅방도 삭제
                                                 FirebaseDatabase.getInstance()
                                                         .getReference("chatRooms")
                                                         .child(roomId)
                                                         .removeValue();
-
                                                 Toast.makeText(getContext(), "방이 삭제되었습니다.", Toast.LENGTH_SHORT).show();
                                                 getParentFragmentManager().popBackStack();
                                             });
                                 } else {
-                                    // 일반 참가자인 경우 참가자 목록에서만 제거
                                     databaseReference.child(roomId).child("participants")
                                             .child(userNickname)
                                             .removeValue()
                                             .addOnSuccessListener(aVoid -> {
-                                                // 채팅방의 participants에서도 제거
                                                 FirebaseDatabase.getInstance()
                                                         .getReference("chatRooms")
                                                         .child(roomId)
                                                         .child("participants")
                                                         .child(userNickname)
                                                         .removeValue();
-
                                                 Toast.makeText(getContext(), "그룹에서 나갔습니다.", Toast.LENGTH_SHORT).show();
                                                 getParentFragmentManager().popBackStack();
                                             });
                                 }
-                            }
+                            });
+                        }
 
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError error) {
-                                Log.e(TAG, "Database error: " + error.getMessage());
-                            }
-                        });
-                    }
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+                            Log.e(TAG, "Database error: " + error.getMessage());
+                        }
+                    });
+                }
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        Log.e(TAG, "Database error: " + error.getMessage());
-                    }
-                });
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Log.e(TAG, "Database error: " + error.getMessage());
+                }
             });
-        } else {
-            Log.e(TAG, "Arguments are null");
         }
 
-        joinRequestButton = view.findViewById(R.id.joinRequestButton);
         joinRequestButton.setOnClickListener(v -> sendJoinRequest());
 
         return view;
