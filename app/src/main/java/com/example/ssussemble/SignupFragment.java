@@ -1,236 +1,165 @@
 package com.example.ssussemble;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import javax.mail.*;
-import javax.mail.internet.*;
-import java.util.Properties;
-import java.util.Random;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class SignupFragment extends Fragment {
-    private static final String SENDER_EMAIL = "cnysjlee2@gmail.com";
-    private static final String SENDER_PASSWORD = "itae mrnn icji icjg";
-    private boolean isVerified = false;
 
+    private TextView idInput, pwdInput, pwdInput2, emailInput, authNumInput;
+    private Button checkDupBtn, sendAuthBtn, registerBtn;
+    private FirebaseFirestore firestore;
     private FirebaseAuth mAuth;
-    private EditText emailInput, passwordInput, verificationCodeInput;
-    private Button sendVerificationButton, verifyCodeButton, signupButton;
-    private ProgressBar progressBar;
-    private String verificationCode;
-    private SharedPreferences mPref;
+    private String generatedAuthCode;
 
+    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_signup, container, false);
 
+        // Firebase 초기화
+        FirebaseApp.initializeApp(requireContext());
+        firestore = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
-        mPref = requireActivity().getSharedPreferences("LoginData", Context.MODE_PRIVATE);
-        initializeViews(view);
-        setupListeners();
 
-        signupButton.setEnabled(false);
-        verificationCodeInput.setEnabled(false);
-        verifyCodeButton.setEnabled(false);
+        // View 초기화
+        idInput = view.findViewById(R.id.register_id);
+        pwdInput = view.findViewById(R.id.register_pwd);
+        pwdInput2 = view.findViewById(R.id.register_pwd2);
+        emailInput = view.findViewById(R.id.register_email);
+        authNumInput = view.findViewById(R.id.register_authNum);
+        checkDupBtn = view.findViewById(R.id.checkDup);
+        sendAuthBtn = view.findViewById(R.id.checkDup2);
+        registerBtn = view.findViewById(R.id.btn_register2);
+
+        // ID 중복 확인 버튼
+        checkDupBtn.setOnClickListener(view1 -> checkDuplicateId());
+
+        // 인증 번호 전송 버튼
+        sendAuthBtn.setOnClickListener(view1 -> sendAuthCode());
+
+        // 회원가입 버튼
+        registerBtn.setOnClickListener(view1 -> registerUser());
 
         return view;
     }
 
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        verificationCodeInput.setEnabled(false);
-        verifyCodeButton.setEnabled(false);
-        signupButton.setEnabled(false);
+    private void checkDuplicateId() {
+        String userId = idInput.getText().toString().trim();
+
+        if (TextUtils.isEmpty(userId)) {
+            Toast.makeText(requireContext(), "아이디를 입력하세요.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        firestore.collection("users")
+                .whereEqualTo("idToken", userId) // 아이디 중복 체크
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                        Toast.makeText(requireContext(), "이미 사용 중인 아이디입니다.", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(requireContext(), "사용 가능한 아이디입니다.", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
-    private void initializeViews(View view) {
-        emailInput = view.findViewById(R.id.emailInput);
-        passwordInput = view.findViewById(R.id.passwordInput);
-        verificationCodeInput = view.findViewById(R.id.verificationCodeInput);
-        sendVerificationButton = view.findViewById(R.id.sendVerificationButton);
-        verifyCodeButton = view.findViewById(R.id.verifyCodeButton);
-        signupButton = view.findViewById(R.id.signupButton);
-        progressBar = view.findViewById(R.id.progressBar);
+    private void sendAuthCode() {
+        String email = emailInput.getText().toString().trim();
 
-        signupButton.setEnabled(false);
-    }
+        if (!email.endsWith("@soongsil.ac.kr")) {
+            Toast.makeText(requireContext(), "숭실대학교 이메일(@soongsil.ac.kr)만 사용 가능합니다.", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-    private void setupListeners() {
-        sendVerificationButton.setOnClickListener(v -> sendVerificationEmail());
-        verifyCodeButton.setOnClickListener(v -> verifyCode());
-        signupButton.setOnClickListener(v -> registerUser());
+        if (TextUtils.isEmpty(email)) {
+            Toast.makeText(requireContext(), "이메일을 입력하세요.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        try {
+            SendMail mail = new SendMail();
+            mail.sendSecurityCode(requireContext(), email);
+            generatedAuthCode = mail.gMailSender.getEmailCode(); // 인증번호 가져오기
+            Log.d("SendAuthCode", "Email sent successfully: " + generatedAuthCode);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(requireContext(), "인증번호 전송 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void registerUser() {
-        if (!isVerified) {
-            showError("이메일 인증이 필요합니다");
+        String userId = idInput.getText().toString().trim();
+        String password = pwdInput.getText().toString();
+        String confirmPassword = pwdInput2.getText().toString();
+        String email = emailInput.getText().toString().trim();
+        String authCode = authNumInput.getText().toString();
+
+        if (TextUtils.isEmpty(userId) || TextUtils.isEmpty(password) || TextUtils.isEmpty(confirmPassword)
+                || TextUtils.isEmpty(email) || TextUtils.isEmpty(authCode)) {
+            Toast.makeText(requireContext(), "모든 필드를 채워주세요.", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        String email = emailInput.getText().toString().trim();
-        String password = passwordInput.getText().toString().trim();
+        if (!password.equals(confirmPassword)) {
+            Toast.makeText(requireContext(), "비밀번호가 다릅니다.", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        if (validateInput(email, password)) {
-            showLoading(true);
-            mAuth.createUserWithEmailAndPassword(email, password)
-                    .addOnSuccessListener(authResult -> {
-                        FirebaseUser user = authResult.getUser();
-                        if (user != null) {
-                            Fragment profileSetupFragment = new ProfileSetupFragment();
-                            getParentFragmentManager().beginTransaction()
-                                    .replace(R.id.fragment_container, profileSetupFragment)
-                                    .commit();
+        if (!authCode.equals(generatedAuthCode)) {
+            Toast.makeText(requireContext(), "인증번호가 일치하지 않습니다.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Firebase Authentication에 사용자 추가
+        mAuth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        FirebaseUser firebaseUser = mAuth.getCurrentUser();
+                        if (firebaseUser != null) {
+                            String uid = firebaseUser.getUid();
+
+                            // Firestore에 유저 정보 저장
+                            UserData userAccount = new UserData();
+                            userAccount.setIdToken(userId);// 입력한 사용자 ID를 저장
+                            Toast.makeText(this.getContext(), userId, Toast.LENGTH_SHORT).show();
+                            Toast.makeText(this.getContext(), userAccount.getIdToken(), Toast.LENGTH_SHORT).show();
+                            userAccount.setEmail(email);
+                            userAccount.setUid(uid); // UID는 별도로 저장
+
+                            firestore.collection("users")
+                                    .document(uid) // UID를 문서 ID로 사용
+                                    .set(userAccount)
+                                    .addOnCompleteListener(firestoreTask -> {
+                                        if (firestoreTask.isSuccessful()) {
+                                            Toast.makeText(requireContext(), "회원가입 완료", Toast.LENGTH_SHORT).show();
+                                            Fragment profileSetupFragment = new ProfileSetupFragment();
+                                            getParentFragmentManager().beginTransaction()
+                                                    .replace(R.id.fragment_container, profileSetupFragment)
+                                                    .commit();
+                                        } else {
+                                            Toast.makeText(requireContext(), "회원가입 실패: Firestore 저장 오류", Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
                         }
-                    })
-                    .addOnFailureListener(e -> {
-                        showLoading(false);
-                        showError("회원가입 실패: " + e.getMessage());
-                    });
-        }
-
-    }
-
-    private void sendVerificationEmail() {
-        String email = emailInput.getText().toString().trim();
-        if (!email.endsWith("@soongsil.ac.kr")) {
-            showError("숭실대학교 이메일(@soongsil.ac.kr)만 사용 가능합니다.");
-            showLoading(false);
-            return;
-        }
-
-        showLoading(true);
-        verificationCode = generateVerificationCode();
-
-        verificationCodeInput.setEnabled(false);
-        verifyCodeButton.setEnabled(false);
-        signupButton.setEnabled(false);
-
-        new Thread(() -> {
-            try {
-                Properties props = new Properties();
-                props.put("mail.smtp.auth", "true");
-                props.put("mail.smtp.starttls.enable", "true");
-                props.put("mail.smtp.host", "smtp.gmail.com");
-                props.put("mail.smtp.port", "587");
-
-                Session session = Session.getInstance(props, new Authenticator() {
-                    @Override
-                    protected PasswordAuthentication getPasswordAuthentication() {
-                        return new PasswordAuthentication(SENDER_EMAIL, SENDER_PASSWORD);
+                    } else {
+                        Toast.makeText(requireContext(), "회원가입 실패: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
-
-                Message message = new MimeMessage(session);
-                message.setFrom(new InternetAddress(SENDER_EMAIL));
-                message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(email));
-                message.setSubject("[SSUsemble] 회원가입 인증번호");
-                message.setText("SSUsemble 회원가입 인증번호는 " + verificationCode + " 입니다.");
-
-                Transport.send(message);
-
-                requireActivity().runOnUiThread(() -> {
-                    Toast.makeText(requireContext(),
-                            "인증번호가 발송되었습니다.",
-                            Toast.LENGTH_SHORT).show();
-                    showLoading(false);
-                    verificationCodeInput.setEnabled(true);
-                    verifyCodeButton.setEnabled(true);
-                });
-
-            } catch (MessagingException e) {
-                requireActivity().runOnUiThread(() -> {
-                    showLoading(false);
-                    showError("이메일 발송 실패: " + e.getMessage());
-                });
-            }
-        }).start();
-    }
-
-    private String generateVerificationCode() {
-        Random random = new Random();
-        StringBuilder code = new StringBuilder();
-        for (int i = 0; i < 6; i++) {
-            code.append(random.nextInt(10));
-        }
-        return code.toString();
-    }
-
-    private void verifyCode() {
-        String inputCode = verificationCodeInput.getText().toString().trim();
-        if (inputCode.isEmpty()) {
-            showError("인증번호를 입력하세요");
-            return;
-        }
-
-        if (inputCode.equals(verificationCode)) {
-            isVerified = true;
-            signupButton.setEnabled(true);
-            Toast.makeText(requireContext(), "인증이 완료되었습니다", Toast.LENGTH_SHORT).show();
-        } else {
-            isVerified = false;
-            signupButton.setEnabled(false);
-            Toast.makeText(requireContext(), "인증번호가 일치하지 않습니다", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private void showLoading(boolean show) {
-        progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
-        emailInput.setEnabled(!show);
-        passwordInput.setEnabled(!show);
-        sendVerificationButton.setEnabled(!show);
-        verifyCodeButton.setEnabled(!show && verificationCode != null);
-        signupButton.setEnabled(!show && verificationCode != null);
-    }
-
-    private void showError(String message) {
-        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
-    }
-
-    private boolean validateInput(String email, String password) {
-        if (email.isEmpty()) {
-            emailInput.setError("이메일을 입력하세요");
-            return false;
-        }
-        if (password.isEmpty()) {
-            passwordInput.setError("비밀번호를 입력하세요");
-            return false;
-        }
-        if (password.length() < 6) {
-            passwordInput.setError("비밀번호는 6자 이상이어야 합니다");
-            return false;
-        }
-        return true;
-    }
-
-    private void saveUserToDatabase(FirebaseUser user) {
-        DatabaseReference usersRef = FirebaseDatabase.getInstance()
-                .getReference("users");
-        UserData userData = new UserData(user);
-        usersRef.child(user.getUid()).setValue(userData);
-    }
-
-    private void saveLoginData(String email, String password) {
-        SharedPreferences.Editor editor = mPref.edit();
-        editor.putString("LoginId", email);
-        editor.putString("LoginPassword", password);
-        editor.apply();
-
-        MainActivity.Login_id = email;
-        MainActivity.Login_password = password;
     }
 }
