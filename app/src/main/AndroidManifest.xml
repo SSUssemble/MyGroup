@@ -18,6 +18,12 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".EditProfile"
+            android:exported="false" />
+        <activity
+            android:name=".EditPassword"
+            android:exported="false" />
+        <activity
             android:name=".DarkModeSetting"
             android:exported="false" />
         <activity

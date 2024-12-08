@@ -25,7 +25,7 @@ public class AppSetting extends AppCompatActivity {
 
         ListView listview = findViewById(R.id.listView);
 
-        String[] listviewItem = {"다크모드 설정", "로그아웃"};
+        String[] listviewItem = {"다크모드 설정", "프로필 변경", "비밀번호 변경", "로그아웃"};
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, listviewItem);
         listview.setAdapter(adapter);
@@ -33,10 +33,16 @@ public class AppSetting extends AppCompatActivity {
         listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                if (i == 0) { // 다크모드 설정 clicked
+                if (i == 0) {// 다크모드 설정 clicked
                     Intent intent = new Intent(AppSetting.this, DarkModeSetting.class);
                     startActivity(intent);
-                } else if (i == 1) { // 로그아웃 clicked
+                } else if (i == 1) { //프로필 변경
+                    Intent intent = new Intent(AppSetting.this, EditProfile.class);
+                    startActivity(intent);
+                }else if(i == 2){//비밀번호 변경
+                    Intent intent = new Intent(AppSetting.this, EditPassword.class);
+                    startActivity(intent);
+                }else if(i == 3) {//로그아웃
                     performLogout();
                 }
             }
