@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.tmp"
+    namespace = "com.example.ssussemble"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.tmp"
+        applicationId = "com.example.ssussemble"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
@@ -43,6 +43,7 @@ android {
 }
 
 dependencies {
+    implementation("com.naver.maps:map-sdk:3.20.0")
     implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
     implementation("com.google.firebase:firebase-analytics")
     implementation(libs.appcompat)
