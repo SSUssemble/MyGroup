@@ -6,4 +6,7 @@
     <item
         android:id="@+id/menu_drawer_sub"
         android:title="서브 채팅창"/>
+    <item
+        android:id="@+id/menu_drawer_rate"
+        android:title="평가하기"/>
 </menu>

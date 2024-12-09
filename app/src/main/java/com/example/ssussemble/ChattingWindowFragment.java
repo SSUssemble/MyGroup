@@ -94,6 +94,16 @@ public class ChattingWindowFragment extends Fragment {
                     drawerLayout.closeDrawer(Gravity.RIGHT);
                     return true;
                 }
+ //               else if (itemId == R.id.menu_drawer_rate) {
+//                    // Navigate to RateFragment
+//                    Fragment rateFragment = rateFragment.newInstance();
+//                    getParentFragmentManager().beginTransaction()
+//                            .replace(R.id.fragment_container, rateFragment)
+//                            .addToBackStack(null)
+//                            .commit();
+//                    drawerLayout.closeDrawer(Gravity.RIGHT);
+//                    return true;
+//                }
                 return false;
             });
 
