@@ -147,6 +147,8 @@ public class ProfileFragment extends Fragment {
                         String department = userData.getDepartment() + " " + userData.getGrade() + "학년";
                         binding.userName.setText(userData.getDisplayName());
                         binding.userDepartment.setText(department);
+
+
                     }
                 }
 
@@ -237,20 +239,3 @@ public class ProfileFragment extends Fragment {
         }
     }
 }
-
-//    private void performLogout() {
-//        mAuth.signOut();
-//
-//        SharedPreferences mPref = requireActivity().getSharedPreferences("LoginData", Context.MODE_PRIVATE);
-//        SharedPreferences.Editor editor = mPref.edit();
-//        editor.remove("LoginId");
-//        editor.remove("LoginPassword");
-//        editor.apply();
-//
-//        MainActivity.Login_id = null;
-//        MainActivity.Login_password = null;
-//
-//        if (getActivity() instanceof MainActivity) {
-//            ((MainActivity) getActivity()).onLogout();
-//        }
-//    }
