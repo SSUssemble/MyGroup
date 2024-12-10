@@ -34,14 +34,6 @@ public class UserData {
         this.uid = uid;
     }
 
-    public String getIdToken() { return idToken; }
-
-    public void setIdToken(String idToken) {
-        this.idToken = idToken;
-    }
-
-    private String idToken;
-
     public String getEmail() {
         return email;
     }

@@ -30,7 +30,7 @@
     <EditText
         android:id="@+id/roomName"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="48dp"
         android:ems="20"
         android:inputType="text"
         android:theme="@style/MediumFont"
@@ -44,7 +44,7 @@
 
         <Spinner
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:id="@+id/spinner"
             android:theme="@style/LightFont"
             android:entries="@array/options"/>
@@ -80,7 +80,7 @@
         android:id="@+id/button2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:theme="@style/LightFont"
-        android:text="방 만들기" />
+        android:text="다음"
+        android:theme="@style/LightFont" />
 
 </LinearLayout>

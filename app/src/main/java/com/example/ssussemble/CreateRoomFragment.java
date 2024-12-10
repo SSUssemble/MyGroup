@@ -46,7 +46,21 @@ public class CreateRoomFragment extends Fragment {
         setupSpinner();
 
         Button buttonCreateRoom = view.findViewById(R.id.button2);
-        buttonCreateRoom.setOnClickListener(v -> createRoomAndChat());
+        buttonCreateRoom.setOnClickListener(v -> {
+            // SelectLocationFragment로 이동
+            getParentFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_container, new SelectLocationFragment())
+                    .addToBackStack(null)
+                    .commit();
+        });
+
+        getParentFragmentManager().setFragmentResultListener("locationSelected", this, (requestKey, result) -> {
+            double latitude = result.getDouble("latitude");
+            double longitude = result.getDouble("longitude");
+
+            // 위치 정보 추가 후 방 생성
+            createRoomAndChat(latitude, longitude);
+        });
 
         return view;
     }
@@ -82,7 +96,7 @@ public class CreateRoomFragment extends Fragment {
         });
     }
 
-    private void createRoomAndChat() {
+    private void createRoomAndChat(double latitude, double longitude) {
         String roomName = editTextRoomName.getText().toString();
         String roomDescription = selectedOption;
         String roomComment = comment.getText().toString();
@@ -100,10 +114,10 @@ public class CreateRoomFragment extends Fragment {
 
                 String roomId = databaseReference.push().getKey();
 
-
                 Room room = new Room(roomId, roomName, roomDescription, roomComment, roomUserNum, leaderEmail);
+                room.setLatitude(latitude);
+                room.setLongitude(longitude);
                 room.setHeader(leaderNickname);
-                room.setDescription(roomDescription);
 
                 databaseReference.child(roomId).setValue(room)
                         .addOnSuccessListener(aVoid -> {
@@ -120,6 +134,7 @@ public class CreateRoomFragment extends Fragment {
             }
         });
     }
+
 
     private void createChatRoom(String roomId, String roomName, String leaderNickname) {
         Map<String, Object> chatRoomMap = new HashMap<>();
