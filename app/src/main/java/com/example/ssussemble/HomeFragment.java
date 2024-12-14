@@ -21,6 +21,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 
 public class HomeFragment extends Fragment {
@@ -61,17 +62,19 @@ public class HomeFragment extends Fragment {
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                roomList.clear();
-                allRooms.clear(); // 초기화
+                roomList.clear(); // 기존 데이터 초기화
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    Room room = snapshot.getValue(Room.class);
+                    Room room = snapshot.getValue(Room.class); // Firebase 데이터를 Room 객체로 변환
                     if (room != null) {
-                        roomList.add(room);
-                        allRooms.add(room); // 전체 방 목록에 추가
+                        // participants 필드를 명시적으로 설정
+                        DataSnapshot participantsSnapshot = snapshot.child("participants");
+                        Map<String, Boolean> participants = (Map<String, Boolean>) participantsSnapshot.getValue();
+                        room.setParticipants(participants);
+
+                        roomList.add(room); // roomList에 추가
                     }
                 }
-                // 어댑터에 변경 사항 알리기
-                roomAdapter.notifyDataSetChanged();
+                roomAdapter.notifyDataSetChanged(); // RecyclerView 업데이트
             }
 
             @Override
@@ -80,6 +83,7 @@ public class HomeFragment extends Fragment {
             }
         });
     }
+
 
     private void setupSearchFilter() {
         binding.searchEditText.addTextChangedListener(new TextWatcher() {

@@ -101,6 +101,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.RoomViewHolder
         holder.roomDescription.setText(room.getDescription());
         holder.roomHeader.setText(room.getHeader());
         holder.roomUserNumMax.setText(room.getUserNumMax());
+        holder.roomUserNumCurr.setText(String.valueOf(room.getCurrentParticipants()));
 
         CardView cardView = (CardView) holder.itemView;
         cardView.setCardBackgroundColor(getCategoryColor(room.getDescription()));
@@ -148,6 +149,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.RoomViewHolder
         TextView roomDescription;
         TextView roomHeader;
         TextView roomUserNumMax;
+        TextView roomUserNumCurr;
 
         public RoomViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -155,6 +157,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.RoomViewHolder
             roomDescription = itemView.findViewById(R.id.textView);
             roomHeader = itemView.findViewById(R.id.header_name);
             roomUserNumMax = itemView.findViewById(R.id.max_user_num);
+            roomUserNumCurr = itemView.findViewById(R.id.current_user_num);
         }
     }
 }

@@ -1,10 +1,13 @@
 package com.example.ssussemble;
 
+import java.util.Map;
+
 public class Room {
     private String id; // 방 ID
     private String name; // 방 이름
     private String description; // 방 설명
     private String comment; // 방 코멘트
+    private Map<String, Boolean> participants;
     private String userNumMax; // 최대 인원
     private String header; // 방 리더 정보
     private double latitude; // 방 위치 (위도)
@@ -22,6 +25,17 @@ public class Room {
         this.comment = comment;
         this.userNumMax = userNumMax;
         this.header = header;
+    }
+
+    public int getCurrentParticipants() {
+        if (participants == null) {
+            return 0;
+        }
+        return participants.size();
+    }
+
+    public void setParticipants(Map<String, Boolean> participants) {
+        this.participants = participants;
     }
 
     // Getter와 Setter
