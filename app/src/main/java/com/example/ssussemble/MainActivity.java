@@ -206,7 +206,7 @@ public class MainActivity extends AppCompatActivity {
         transaction.replace(R.id.fragment_container, fragment);
         transaction.commit();
 
-        if (fragment instanceof HomeFragment) {
+        if (fragment instanceof HomeFragment || fragment instanceof MapFragment) {
             goToMapButton.setVisibility(View.VISIBLE);
         } else {
             goToMapButton.setVisibility(View.GONE);
