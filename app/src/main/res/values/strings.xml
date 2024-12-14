@@ -5,11 +5,14 @@
     <string name="drawer_close">내비게이션 닫기</string>
     <string name="msg_token_fmt">FCM 토큰: %s</string>
 
-    //home
     <string-array name="options">
         <item>팀플</item>
-        <item>공모전</item>
+        <item>대회</item>
+        <item>스터디</item>
+        <item>미팅</item>
         <item>기타</item>
     </string-array>
-</resources>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
+</resources>

@@ -27,12 +27,9 @@
     </LinearLayout>
 
     <EditText
-        android:id="@+id/editTextText"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:ems="20"
         android:inputType="text"
-        android:text="방 이름" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -41,7 +38,6 @@
 
         <Spinner
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:id="@+id/spinner"
             android:entries="@array/options"/>
 
@@ -54,19 +50,14 @@
     </LinearLayout>
 
     <EditText
-        android:id="@+id/editTextText2"
         android:layout_width="match_parent"
         android:layout_height="164dp"
         android:ems="10"
         android:inputType="text"
-        android:text="Name" />
 
     <Button
         android:id="@+id/button2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Create" />
 
-
-    <!-- 다른 필요한 뷰 요소들을 여기에 추가 -->
 </LinearLayout>

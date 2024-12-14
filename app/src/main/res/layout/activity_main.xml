@@ -10,10 +10,21 @@
         android:id="@+id/fragment_container"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"/>
-
+        android:layout_weight="1">
+    </FrameLayout>
 
     <!-- 하단 네비게이션 -->
+    <ImageButton
+        android:id="@+id/go_to_map"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_gravity="end"
+        android:background="@drawable/roud_button_background"
+        android:scaleType="centerInside"
+        android:src="@drawable/go_map"
+        android:contentDescription="transfer_map"
+        android:clipToOutline="true"/>
+
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
         android:layout_width="match_parent"

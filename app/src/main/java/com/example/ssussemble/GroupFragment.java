@@ -1,11 +1,9 @@
 package com.example.ssussemble;
 
 import android.content.Context;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -15,8 +13,10 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
+
 import androidx.appcompat.widget.Toolbar;
+
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.*;
 
 import java.text.SimpleDateFormat;
@@ -50,194 +50,7 @@ public class GroupFragment extends Fragment {
 
     private void setupToolbar(View view) {
         toolbar = view.findViewById(R.id.toolbar);
-        toolbar.setTitleTextAppearance(getContext(), R.style.ToolbarTheme);
-
-        toolbar.inflateMenu(R.menu.menu_group);
-        toolbar.setOnMenuItemClickListener(item -> {
-            int itemId = item.getItemId();
-            if (itemId == R.id.create_chat) {
-                showCreateChatDialog();
-                return true;
-            } else if (itemId == R.id.create_group_chat) {
-                showCreateGroupChatDialog();
-                return true;
-            } else if (itemId == R.id.bell) {
-                Toast.makeText(getContext(), "알림 클릭", Toast.LENGTH_SHORT).show();
-                return true;
-            }
-            return false;
-        });
-    }
-
-    private void showCreateChatDialog() {
-        databaseReference.child("users")
-                .orderByChild("email")
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        ArrayList<String> users = new ArrayList<>();
-                        for (DataSnapshot userSnapshot : snapshot.getChildren()) {
-                            String email = userSnapshot.child("email").getValue(String.class);
-                            if (email != null && !email.equals(MainActivity.Login_id)) {
-                                users.add(email);
-                            }
-                        }
-
-                        if (users.isEmpty()) {
-                            Toast.makeText(getContext(), "대화 가능한 사용자가 없습니다.", Toast.LENGTH_SHORT).show();
-                            return;
-                        }
-
-                        new AlertDialog.Builder(requireContext())
-                                .setTitle("대화상대 선택")
-                                .setItems(users.toArray(new String[0]), (dialog, which) -> {
-                                    String selectedUser = users.get(which);
-                                    createOneToOneChatRoom(selectedUser);
-                                })
-                                .show();
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        Log.e(TAG, "사용자 목록 로드 실패", error.toException());
-                    }
-                });
-    }
-
-    private void createOneToOneChatRoom(String otherUserEmail) {
-        String currentUserEmail = MainActivity.Login_id.replace(".", "_dot_").replace("@", "_at_");
-        String otherUserEmailKey = otherUserEmail.replace(".", "_dot_").replace("@", "_at_");
-        String roomId = "chat_" + currentUserEmail + "_" + otherUserEmailKey;
-
-        databaseReference.child("chatRooms").child(roomId)
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        if (!snapshot.exists()) {
-                            Map<String, Object> roomData = new HashMap<>();
-                            Map<String, Boolean> participants = new HashMap<>();
-
-                            participants.put(currentUserEmail, true);
-                            participants.put(otherUserEmailKey, true);
-
-                            roomData.put("type", "one_to_one");
-                            roomData.put("participants", participants);
-                            roomData.put("created_at", ServerValue.TIMESTAMP);
-
-                            databaseReference.child("chatRooms").child(roomId)
-                                    .setValue(roomData)
-                                    .addOnSuccessListener(aVoid -> {
-                                        Log.d(TAG, "1:1 채팅방 생성 성공");
-                                        if (isAdded()) {
-                                            navigateToChatRoom(roomId);
-                                        }
-                                    })
-                                    .addOnFailureListener(e -> {
-                                        Log.e(TAG, "1:1 채팅방 생성 실패", e);
-                                        if (isAdded()) {
-                                            Toast.makeText(getContext(), "채팅방 생성에 실패했습니다.", Toast.LENGTH_SHORT).show();
-                                        }
-                                    });
-                        } else {
-                            // 이미 존재하는 채팅방으로 이동
-                            if (isAdded()) {
-                                navigateToChatRoom(roomId);
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        Log.e(TAG, "채팅방 확인 실패", error.toException());
-                    }
-                });
-    }
-
-    private void createGroupChatRoom(ArrayList<String> participants) {
-        String currentUserEmail = MainActivity.Login_id.replace(".", "_dot_").replace("@", "_at_");
-        String roomId = "group_" + System.currentTimeMillis();
-        String roomName = "그룹 채팅방 " + participants.size() + "명";
-
-        Map<String, Object> roomData = new HashMap<>();
-        Map<String, Boolean> participantsMap = new HashMap<>();
-
-        // 참가자 정보 설정
-        participantsMap.put(currentUserEmail, true);
-        for (String participantEmail : participants) {
-            String participantEmailKey = participantEmail.replace(".", "_dot_").replace("@", "_at_");
-            participantsMap.put(participantEmailKey, true);
-        }
-
-        roomData.put("type", "group");
-        roomData.put("participants", participantsMap);
-        roomData.put("created_at", ServerValue.TIMESTAMP);
-        roomData.put("name", roomName);
-
-        // chatRooms에만 저장
-        databaseReference.child("chatRooms").child(roomId)
-                .setValue(roomData)
-                .addOnSuccessListener(aVoid -> {
-                    Log.d(TAG, "그룹 채팅방 생성 성공");
-                    if (isAdded()) {
-                        navigateToChatRoom(roomId);  // roomId를 전달
-                    }
-                });
-    }
-
-    private void navigateToChatRoom(String roomId) {
-        Fragment chatFragment = ChattingWindowFragment.newInstance(roomId);
-        getParentFragmentManager().beginTransaction()
-                .replace(R.id.fragment_container, chatFragment)
-                .addToBackStack(null)
-                .commit();
-    }
-
-    private void showCreateGroupChatDialog() {
-        databaseReference.child("users")
-                .orderByChild("email")
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        ArrayList<String> users = new ArrayList<>();
-                        for (DataSnapshot userSnapshot : snapshot.getChildren()) {
-                            String email = userSnapshot.child("email").getValue(String.class);
-                            if (email != null && !email.equals(MainActivity.Login_id)) {
-                                users.add(email);
-                            }
-                        }
-
-                        if (users.isEmpty()) {
-                            Toast.makeText(getContext(), "초대할 사용자가 없습니다.", Toast.LENGTH_SHORT).show();
-                            return;
-                        }
-
-                        boolean[] checkedItems = new boolean[users.size()];
-                        new AlertDialog.Builder(requireContext())
-                                .setTitle("그룹 채팅방 만들기")
-                                .setMultiChoiceItems(users.toArray(new String[0]), checkedItems, (dialog, which, isChecked) -> {
-                                    checkedItems[which] = isChecked;
-                                })
-                                .setPositiveButton("만들기", (dialog, which) -> {
-                                    ArrayList<String> selectedUsers = new ArrayList<>();
-                                    selectedUsers.add(MainActivity.Login_id);
-                                    for (int i = 0; i < checkedItems.length; i++) {
-                                        if (checkedItems[i]) {
-                                            selectedUsers.add(users.get(i));
-                                        }
-                                    }
-                                    if (selectedUsers.size() > 1) {
-                                        createGroupChatRoom(selectedUsers);
-                                    }
-                                })
-                                .setNegativeButton("취소", null)
-                                .show();
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        Log.e(TAG, "사용자 목록 로드 실패", error.toException());
-                    }
-                });
+        toolbar.setTitleTextAppearance(getContext(), R.style.BoldFont);
     }
 
     private void setupRecyclerView(View view) {
@@ -250,62 +63,46 @@ public class GroupFragment extends Fragment {
     }
 
     private void loadChatRooms() {
-        String currentUserEmail = MainActivity.Login_id.replace(".", "_dot_").replace("@", "_at_");
-        databaseReference.child("chatRooms")
-                .addValueEventListener(new ValueEventListener() {
+        DatabaseReference userRef = FirebaseDatabase.getInstance()
+                .getReference("users")
+                .child(FirebaseAuth.getInstance().getCurrentUser().getUid());
+
+        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot userSnapshot) {
+                String currentUserNickname = userSnapshot.child("displayName").getValue(String.class);
+
+                databaseReference.child("chatRooms").addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         chattingRoomList.clear();
                         for (DataSnapshot roomSnapshot : snapshot.getChildren()) {
-                            try {
-                                DataSnapshot participantsSnapshot = roomSnapshot.child("participants");
-                                if (!participantsSnapshot.hasChild(currentUserEmail)) {
-                                    continue;
-                                }
-
-                                String type = roomSnapshot.child("type").getValue(String.class);
-                                if ("sub".equals(type)) {
-                                    continue;
-                                }
-
+                            DataSnapshot participantsSnapshot = roomSnapshot.child("participants");
+                            if (participantsSnapshot.hasChild(currentUserNickname)) {
                                 String roomId = roomSnapshot.getKey();
                                 ChatRoomInfo chatRoom = new ChatRoomInfo();
                                 chatRoom.Chatting_room_id = roomId;
 
-                                if ("group".equals(type)) {
+                                if (roomSnapshot.child("type").getValue(String.class).equals("group")) {
                                     chatRoom.isthis_chatroom_group = true;
                                     chatRoom.group_id = new ArrayList<>();
-                                    if (roomSnapshot.child("name").exists()) {
-                                        chatRoom.Chatting_room_id = roomId;
-                                        String roomName = roomSnapshot.child("name").getValue(String.class);
-                                    }
-
                                     for (DataSnapshot participantSnapshot : participantsSnapshot.getChildren()) {
-                                        String participantEmail = participantSnapshot.getKey()
-                                                .replace("_dot_", ".")
-                                                .replace("_at_", "@");
-                                        chatRoom.group_id.add(participantEmail);
+                                        chatRoom.group_id.add(participantSnapshot.getKey());
                                     }
-                                    chatRoom.bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_chat_room);
+                                    chatRoom.Chatting_room_id = roomSnapshot.child("name").getValue(String.class);
                                 } else {
                                     chatRoom.isthis_chatroom_group = false;
-                                    chatRoom.id1 = MainActivity.Login_id;
                                     for (DataSnapshot participantSnapshot : participantsSnapshot.getChildren()) {
-                                        String participantEmail = participantSnapshot.getKey()
-                                                .replace("_dot_", ".")
-                                                .replace("_at_", "@");
-                                        if (!participantEmail.equals(MainActivity.Login_id)) {
-                                            chatRoom.id2 = participantEmail;
+                                        String participantNickname = participantSnapshot.getKey();
+                                        if (!participantNickname.equals(currentUserNickname)) {
+                                            chatRoom.id2 = participantNickname;
                                             break;
                                         }
                                     }
-                                    chatRoom.bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_chat_room2);
                                 }
 
                                 chattingRoomList.add(chatRoom);
                                 setupLastMessageListener(chatRoom);
-                            } catch (Exception e) {
-                                Log.e(TAG, "채팅방 정보 처리 중 오류: " + e.getMessage());
                             }
                         }
                         adapter.notifyDataSetChanged();
@@ -316,6 +113,13 @@ public class GroupFragment extends Fragment {
                         Log.e(TAG, "채팅방 로드 실패", error.toException());
                     }
                 });
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e(TAG, "사용자 정보 로드 실패", error.toException());
+            }
+        });
     }
 
     private void setupLastMessageListener(ChatRoomInfo chatRoom) {
@@ -368,7 +172,6 @@ public class GroupFragment extends Fragment {
 
                     @Override
                     public void onLongClick(View view, int position) {
-                        // 필요한 경우 구현
                     }
                 }));
     }

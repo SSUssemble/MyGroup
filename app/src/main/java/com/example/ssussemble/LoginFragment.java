@@ -48,7 +48,13 @@ public class LoginFragment extends Fragment {
 
     private void setupListeners() {
         loginButton.setOnClickListener(v -> loginUser());
-        signupButton.setOnClickListener(v -> registerUser());
+        signupButton.setOnClickListener(v -> {
+            Fragment signupFragment = new SignupFragment();
+            requireActivity().getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_container, signupFragment)
+                    .addToBackStack(null)
+                    .commit();
+        });
     }
 
     private void loginUser() {

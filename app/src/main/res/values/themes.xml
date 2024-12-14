@@ -1,15 +1,27 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.SSUSSEMBLE" parent="Theme.Material3.DayNight.NoActionBar">
-    </style>
+        <item name="colorPrimary">@color/teal_700</item>
+        <item name="colorPrimaryVariant">@color/teal_200</item>
+        <item name="colorOnPrimary">@color/white</item>
 
-    <style name="ToolbarTheme" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorSecondary">@color/cardview_light_background</item>
+        <item name="colorSecondaryVariant">@color/white</item>
+        <item name="colorOnSecondary">@color/white</item>
+    </style>
+    <style name="BackgroundColor"><item name="android:background">@color/white</item></style>
+    <style name="itemColor"><item name="android:background">@color/dark_white</item></style>
+    <style name="textColor"><item name="android:background">@color/black</item></style>
+    <style name="SunOrMoon"><item name ="android:src">@drawable/thumbfalse</item></style>
+    <style name="BoldFont" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="android:fontFamily">@font/esamanru_bold</item>
         <item name="android:textSize">30dp</item>
     </style>
-
-    <style name="DrawerTheme" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="MediumFont" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="android:fontFamily">@font/esamanru_medium</item>
+    </style>
+    <style name="LightFont" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:fontFamily">@font/esamanru_light</item>
     </style>
 
     <style name="Theme.SSUSSEMBLE" parent="Base.Theme.SSUSSEMBLE" />
