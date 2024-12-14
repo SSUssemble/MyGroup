@@ -30,11 +30,11 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
-    private ImageButton goToMapButton;
     public static String Login_id = null;
     public static String Login_password = null;
     private static final int NOTIFICATION_PERMISSION_CODE = 100;
     private static final String TAG = "FCM_Service";
+    private ImageButton goToMapButton;
 
     private List<Fragment> fragmentList = new ArrayList<>();
     private FragmentManager fragmentManager;
@@ -53,9 +53,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         initializeComponents();
-        goToMapButton = findViewById(R.id.go_to_map);
-        goToMapButton.setVisibility(View.GONE);
-
+        setupGoToMapButton();
         setupFragments();
         setupBottomNavigation();
         setupGoToMapButton();
@@ -120,15 +118,15 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void onLogout() {
-        mAuth.signOut();
-        Login_id = null;
-        Login_password = null;
-        bottomNavigationView.setVisibility(View.GONE);
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragment_container, new LoginFragment())
-                .commit();
-    }
+//    public void onLogout() {
+//        mAuth.signOut();
+//        Login_id = null;
+//        Login_password = null;
+//        bottomNavigationView.setVisibility(View.GONE);
+//        getSupportFragmentManager().beginTransaction()
+//                .replace(R.id.fragment_container, new LoginFragment())
+//                .commit();
+//    }
 
     private void initializeComponents() {
         fragmentManager = getSupportFragmentManager();
@@ -156,6 +154,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupGoToMapButton() {
+        goToMapButton = findViewById(R.id.go_to_map);
         goToMapButton.setOnClickListener(view -> {
             Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
 
@@ -194,6 +193,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
     private void showHomeFragment() {
         getSupportFragmentManager()
                 .beginTransaction()
@@ -206,12 +206,10 @@ public class MainActivity extends AppCompatActivity {
         transaction.replace(R.id.fragment_container, fragment);
         transaction.commit();
 
-        if (goToMapButton != null) {
-            if (fragment instanceof HomeFragment || fragment instanceof MapFragment) {
-                goToMapButton.setVisibility(View.VISIBLE);
-            } else {
-                goToMapButton.setVisibility(View.GONE);
-            }
+        if (fragment instanceof HomeFragment) {
+            goToMapButton.setVisibility(View.VISIBLE);
+        } else {
+            goToMapButton.setVisibility(View.GONE);
         }
     }
 

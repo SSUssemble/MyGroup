@@ -6,6 +6,7 @@ public class UserData {
     private String uid;
     private String email;
     private String displayName;
+    private String rate;
     private long createdAt;
     private String profileImageUrl;
     private String department;
@@ -19,6 +20,7 @@ public class UserData {
         this.email = user.getEmail();
         this.displayName = user.getDisplayName();
         this.createdAt = System.currentTimeMillis();
+        this.rate = user.getPhoneNumber();
         this.department = "";
         this.grade = "";
         if (user.getPhotoUrl() != null) {
@@ -69,6 +71,8 @@ public class UserData {
     public String getDepartment() {
         return department;
     }
+
+    public String getRate() {return rate;}
 
     public void setDepartment(String department) {
         this.department = department;

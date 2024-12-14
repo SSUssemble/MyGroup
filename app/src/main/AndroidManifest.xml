@@ -26,6 +26,10 @@
         <activity
             android:name=".AppSetting"
             android:exported="false" />
+        <activity android:name=".EditProfile"
+            android:exported="false"/>
+        <activity android:name=".EditPassword"
+            android:exported="false"/>
         <activity
             android:name=".MainActivity"
             android:exported="true">
