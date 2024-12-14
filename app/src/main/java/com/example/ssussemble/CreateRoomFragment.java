@@ -153,12 +153,12 @@ public class CreateRoomFragment extends Fragment {
         chatRoomMap.put("name", roomName);
         chatRoomMap.put("type", "group");
 
-        Map<String, Boolean> participants = new HashMap<>();
-        participants.put(leaderNickname, true);
+        Map<String, String> participants = new HashMap<>();
+        String leaderUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        participants.put(leaderNickname, leaderUid);
         chatRoomMap.put("participants", participants);
         chatRoomMap.put("created_at", ServerValue.TIMESTAMP);
-
-        databaseReference.child(roomId).child("participants").child(leaderNickname).setValue(true);
+        databaseReference.child(roomId).child("participants").child(leaderNickname).setValue(leaderUid);
 
         chatRoomsRef.child(roomName).setValue(chatRoomMap)
                 .addOnSuccessListener(aVoid -> {
