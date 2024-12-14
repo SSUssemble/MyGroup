@@ -12,6 +12,7 @@ firebaseAuth = "23.1.0"
 firebaseMessaging = "24.1.0"
 volley = "1.2.1"
 transportApi = "3.0.0"
+firebaseStorage = "21.0.1"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -26,6 +27,7 @@ firebase-auth = { group = "com.google.firebase", name = "firebase-auth", version
 firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging", version.ref = "firebaseMessaging" }
 volley = { group = "com.android.volley", name = "volley", version.ref = "volley" }
 transport-api = { group = "com.google.android.datatransport", name = "transport-api", version.ref = "transportApi" }
+firebase-storage = { group = "com.google.firebase", name = "firebase-storage", version.ref = "firebaseStorage" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
