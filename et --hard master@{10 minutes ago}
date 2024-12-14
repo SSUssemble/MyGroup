@@ -1,0 +1,12 @@
+[33mc35c76f[m[33m ([m[1;36mHEAD -> [m[1;32msmin[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{0}: reset: moving to HEAD
+[33mc35c76f[m[33m ([m[1;36mHEAD -> [m[1;32msmin[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{1}: reset: moving to HEAD
+[33mc35c76f[m[33m ([m[1;36mHEAD -> [m[1;32msmin[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{2}: commit: map error fixed
+[33me78315d[m HEAD@{3}: commit: map button 에러 해결
+[33m3f5b84f[m HEAD@{4}: commit (merge): Merge remote-tracking branch 'origin/main' into smin
+[33m962847f[m[33m ([m[1;31morigin/smin[m[33m)[m HEAD@{5}: commit: map button error fixed
+[33m1f92ea9[m HEAD@{6}: reset: moving to HEAD
+[33m1f92ea9[m HEAD@{7}: commit: map
+[33m7c83e53[m HEAD@{8}: commit: room filtering
+[33mfb9830b[m HEAD@{9}: commit: room filtering
+[33m54ea9d1[m[33m ([m[1;32mmain[m[33m)[m HEAD@{10}: checkout: moving from main to smin
+[33m54ea9d1[m[33m ([m[1;32mmain[m[33m)[m HEAD@{11}: clone: from https://github.com/SSUssemble/MyGroup.git
