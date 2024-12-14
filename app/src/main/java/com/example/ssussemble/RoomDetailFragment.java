@@ -12,6 +12,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -21,8 +23,12 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+
 
 
 public class RoomDetailFragment extends Fragment {
@@ -32,6 +38,10 @@ public class RoomDetailFragment extends Fragment {
     private static final String ARG_ROOM_DESCRIPTION = "room_description";
     private static final String ARG_ROOM_COMMENT = "room_comment";
     private static final String TAG = "RoomDetailFragment";
+
+    private RecyclerView recyclerViewUsersProfile;
+    private UserProfileAdapter userProfileAdapter;
+
 
     private DatabaseReference databaseReference;
 
@@ -59,6 +69,21 @@ public class RoomDetailFragment extends Fragment {
         TextView textViewRoomComment = view.findViewById(R.id.textViewRoomComment);
         Button exitRoomButton = view.findViewById(R.id.exitRoom);
         joinRequestButton = view.findViewById(R.id.joinRequestButton);
+
+        recyclerViewUsersProfile = view.findViewById(R.id.recyclerViewUsersProfile);
+        recyclerViewUsersProfile.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        // 샘플 데이터
+        List<UserProfile> userProfiles = Arrays.asList(
+                new UserProfile("Alice", "url_to_image1"),
+                new UserProfile("Bob", "url_to_image2"),
+                new UserProfile("Charlie", "url_to_image3")
+        );
+
+        userProfileAdapter = new UserProfileAdapter(userProfiles);
+        recyclerViewUsersProfile.setAdapter(userProfileAdapter);
+
+
 
         databaseReference = FirebaseDatabase.getInstance().getReference("rooms");
 
