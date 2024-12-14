@@ -117,7 +117,9 @@ public class ChattingWindowFragment extends Fragment {
     private void sendMessage(String message) {
         if (!message.trim().isEmpty()) {
             long timeStamp = System.currentTimeMillis() + TimeZone.getTimeZone("Asia/Seoul").getRawOffset();
-            ChatData chatData = new ChatData(MainActivity.Login_id, message, timeStamp);
+
+            String nickName = MainActivity.Login_id.substring(0, MainActivity.Login_id.indexOf("@"));
+            ChatData chatData = new ChatData(nickName, message, timeStamp);
 
             DatabaseReference messageRef = databaseReference.child("chatRooms")
                     .child(roomId)
@@ -126,68 +128,72 @@ public class ChattingWindowFragment extends Fragment {
 
             messageRef.setValue(chatData).addOnSuccessListener(aVoid -> {
                 sendFCMNotification(message);
+                Log.d(TAG, "메시지 전송");
                 binding.ChattingMessage.setText("");
             });
         }
     }
 
     private void sendFCMNotification(String message) {
+        Log.d(TAG, "알림 전송");
         String FCM_SERVER_URL = "https://mathematical-olwen-ssu-91f12aef.koyeb.app/send-notification";
 
         DatabaseReference roomRef = databaseReference.child("chatRooms").child(roomId);
+        Log.d(TAG, "방 찾기 : " + roomId);
         roomRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                String roomName = snapshot.child("name").exists() ?
-                        snapshot.child("name").getValue(String.class) :
-                        "채팅방";
-
                 for (DataSnapshot participantSnapshot : snapshot.child("participants").getChildren()) {
-                    String participantId = participantSnapshot.getKey();
-                    if (!participantId.equals(MainActivity.Login_id)) {
-                        DatabaseReference fcmRef = databaseReference.child("users")
-                                .child(participantId)
-                                .child("fcmToken");
+                    String participantName = participantSnapshot.getKey();
+                    String participantId = participantName + "_at_soongsil_dot_ac_dot_kr";
 
-                        fcmRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                String token = snapshot.getValue(String.class);
-                                if (token != null) {
-                                    RequestQueue queue = Volley.newRequestQueue(requireContext());
-                                    JSONObject requestBody = new JSONObject();
-                                    try {
-                                        requestBody.put("token", token);
-                                        requestBody.put("title", roomName);
-                                        requestBody.put("body", message);
+                    DatabaseReference fcmRef = databaseReference.child("users")
+                            .child(participantId)
+                            .child("fcmToken");
 
-                                        JSONObject data = new JSONObject();
-                                        data.put("chatRoomId", roomId);
-                                        data.put("senderId", MainActivity.Login_id);
-                                        data.put("message", message);
-                                        requestBody.put("data", data);
+                    fcmRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            String token = snapshot.getValue(String.class);
 
-                                        JsonObjectRequest request = new JsonObjectRequest(
-                                                Request.Method.POST,
-                                                FCM_SERVER_URL,
-                                                requestBody,
-                                                response -> Log.d(TAG, "FCM 전송 성공: " + response.toString()),
-                                                error -> Log.e(TAG, "FCM 전송 실패", error)
-                                        );
+                            Log.d(TAG, "TOKEN : " + token);
+                            if (token != null) {
+                                RequestQueue queue = Volley.newRequestQueue(requireContext());
+                                JSONObject requestBody = new JSONObject();
+                                try {
+                                    requestBody.put("token", token);
+                                    requestBody.put("title", roomId);
+                                    requestBody.put("body", message);
 
-                                        queue.add(request);
-                                    } catch (JSONException e) {
-                                        Log.e(TAG, "JSON 생성 실패", e);
-                                    }
+                                    JSONObject data = new JSONObject();
+                                    data.put("chatRoomId", roomId);
+
+                                    String nickName = MainActivity.Login_id.substring(0, MainActivity.Login_id.indexOf("@"));
+                                    data.put("senderId", nickName);
+                                    data.put("message", message);
+                                    data.put("click_action", "OPEN_CHAT_ROOM");
+                                    requestBody.put("data", data);
+
+                                    JsonObjectRequest request = new JsonObjectRequest(
+                                            Request.Method.POST,
+                                            FCM_SERVER_URL,
+                                            requestBody,
+                                            response -> Log.d(TAG, "FCM 전송 성공: " + response.toString()),
+                                            error -> Log.e(TAG, "FCM 전송 실패", error)
+                                    );
+
+                                    queue.add(request);
+                                } catch (JSONException e) {
+                                    Log.e(TAG, "JSON 생성 실패", e);
                                 }
                             }
+                        }
 
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError error) {
-                                Log.e(TAG, "FCM 토큰 가져오기 실패", error.toException());
-                            }
-                        });
-                    }
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+                            Log.e(TAG, "FCM 토큰 가져오기 실패", error.toException());
+                        }
+                    });
                 }
             }
 

@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -117,16 +118,6 @@ public class MainActivity extends AppCompatActivity {
             bottomNavigationView.setSelectedItemId(R.id.navigation_home);
         }
     }
-
-//    public void onLogout() {
-//        mAuth.signOut();
-//        Login_id = null;
-//        Login_password = null;
-//        bottomNavigationView.setVisibility(View.GONE);
-//        getSupportFragmentManager().beginTransaction()
-//                .replace(R.id.fragment_container, new LoginFragment())
-//                .commit();
-//    }
 
     private void initializeComponents() {
         fragmentManager = getSupportFragmentManager();
