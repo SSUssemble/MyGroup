@@ -53,6 +53,9 @@ public class MainActivity extends AppCompatActivity {
         }
 
         initializeComponents();
+        goToMapButton.findViewById(R.id.go_to_map);
+        goToMapButton.setVisibility(View.GONE);
+
         setupGoToMapButton();
         setupFragments();
         setupBottomNavigation();
@@ -154,7 +157,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupGoToMapButton() {
-        goToMapButton = findViewById(R.id.go_to_map);
         goToMapButton.setOnClickListener(view -> {
             Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
 
@@ -206,10 +208,12 @@ public class MainActivity extends AppCompatActivity {
         transaction.replace(R.id.fragment_container, fragment);
         transaction.commit();
 
-        if (fragment instanceof HomeFragment) {
-            goToMapButton.setVisibility(View.VISIBLE);
-        } else {
-            goToMapButton.setVisibility(View.GONE);
+        if (goToMapButton != null) {
+            if (fragment instanceof HomeFragment || fragment instanceof MapFragment) {
+                goToMapButton.setVisibility(View.VISIBLE);
+            } else {
+                goToMapButton.setVisibility(View.GONE);
+            }
         }
     }
 
