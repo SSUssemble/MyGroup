@@ -147,8 +147,6 @@ public class ProfileFragment extends Fragment {
                         String department = userData.getDepartment() + " " + userData.getGrade() + "학년";
                         binding.userName.setText(userData.getDisplayName());
                         binding.userDepartment.setText(department);
-
-
                     }
                 }
 
