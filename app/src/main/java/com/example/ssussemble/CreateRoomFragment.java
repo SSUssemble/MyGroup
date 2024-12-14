@@ -8,6 +8,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -45,6 +46,15 @@ public class CreateRoomFragment extends Fragment {
         initializeViews(view);
         setupSpinner();
 
+        ImageView goBack = view.findViewById(R.id.back_button_image);
+
+        goBack.setOnClickListener(view1 -> {
+            getParentFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_container, new HomeFragment())
+                    .addToBackStack(null)
+                    .commit();
+        });
+
         Button buttonCreateRoom = view.findViewById(R.id.button2);
         buttonCreateRoom.setOnClickListener(v -> {
             // SelectLocationFragment로 이동
@@ -53,6 +63,8 @@ public class CreateRoomFragment extends Fragment {
                     .addToBackStack(null)
                     .commit();
         });
+
+
 
         getParentFragmentManager().setFragmentResultListener("locationSelected", this, (requestKey, result) -> {
             double latitude = result.getDouble("latitude");
