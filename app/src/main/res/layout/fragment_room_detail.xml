@@ -34,7 +34,7 @@
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="300dp">
+        android:layout_height="wrap_content">
         <TextView
             android:id="@+id/textViewRoomComment"
             android:layout_width="match_parent"
@@ -43,6 +43,18 @@
             android:theme="@style/LightFont"
             android:textSize="16sp" />
     </ScrollView>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerviewUsersProfile"
+        android:layout_width="380dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        app:layoutManager="LinearLayoutManager"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar">
+    </androidx.recyclerview.widget.RecyclerView>
+
 
     <LinearLayout
         android:layout_width="match_parent"
