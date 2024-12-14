@@ -56,27 +56,32 @@ public class AppSetting extends AppCompatActivity {
                 .setMessage("정말 로그아웃 하시겠습니까?")
                 .setPositiveButton("예", (dialog, which) -> {
 
-        mAuth.signOut();
+                    // Firebase 로그아웃
+                    mAuth.signOut();
 
-        SharedPreferences mPref = getSharedPreferences("LoginData", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = mPref.edit();
-        editor.remove("LoginId");
-        editor.remove("LoginPassword");
-        editor.apply();
+                    // SharedPreferences에서 로그인 정보 삭제
+                    SharedPreferences mPref = getSharedPreferences("LoginData", Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = mPref.edit();
+                    editor.remove("LoginId");
+                    editor.remove("LoginPassword");
+                    editor.apply();
 
-        MainActivity.Login_id = null;
-        MainActivity.Login_password = null;
+                    MainActivity.Login_id = null;
+                    MainActivity.Login_password = null;
 
-        // Navigate back to the login screen
-        Intent intent = new Intent(AppSetting.this, LoginFragment.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-        finish();
+                    Intent intent = new Intent(AppSetting.this, MainActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+
+                    SharedPreferences sharedPrefs = getSharedPreferences("AppSettings", Context.MODE_PRIVATE);
+                    SharedPreferences.Editor appEditor = sharedPrefs.edit();
+                    appEditor.putBoolean("isLoggedOut", true);
+                    appEditor.apply();
+
+                    finish();
                 })
-                .setNegativeButton("아니오", (dialog, which) -> {
-
-                    dialog.dismiss();
-                })
+                .setNegativeButton("아니오", (dialog, which) -> dialog.dismiss())
                 .show();
     }
+
 }
