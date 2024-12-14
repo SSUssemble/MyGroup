@@ -92,7 +92,7 @@ public class RequestAdapter extends RecyclerView.Adapter<RequestAdapter.RequestV
         DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
         Map<String, Object> updates = new HashMap<>();
         updates.put("rooms/" + request.getRoomId() + "/participants/" + request.getRequesterNickname(), true);
-        updates.put("chatRooms/" + request.getRoomId() + "/participants/" + request.getRequesterNickname(), true);
+        updates.put("chatRooms/" + request.getRoomName() + "/participants/" + request.getRequesterNickname(), true);
 
         rootRef.updateChildren(updates)
                 .addOnSuccessListener(aVoid -> {

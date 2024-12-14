@@ -54,7 +54,9 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @Override
     public int getItemViewType(int position) {
         ChatData chat = chatList.get(position);
-        if (chat.getUserName().equals(MainActivity.Login_id)) {
+
+        String nickName = MainActivity.Login_id.substring(0, MainActivity.Login_id.indexOf("@"));
+        if (chat.getUserName().equals(nickName)) {
             return VIEW_TYPE_MINE;
         } else {
             return VIEW_TYPE_OTHER;

@@ -160,7 +160,7 @@ public class CreateRoomFragment extends Fragment {
 
         databaseReference.child(roomId).child("participants").child(leaderNickname).setValue(true);
 
-        chatRoomsRef.child(roomId).setValue(chatRoomMap)
+        chatRoomsRef.child(roomName).setValue(chatRoomMap)
                 .addOnSuccessListener(aVoid -> {
                     Toast.makeText(requireContext(), "방 생성 완료", Toast.LENGTH_SHORT).show();
                     getParentFragmentManager().popBackStack();
