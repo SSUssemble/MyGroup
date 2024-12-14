@@ -16,6 +16,7 @@
     <style name="itemColor"><item name="android:itemBackground">@color/black</item></style>
     <style name="textColor"><item name="android:textColor">@color/white</item></style>
     <style name="SunOrMoon"><item name ="android:src">@drawable/thumbtrue</item></style>
+    <style name="SunOrMoonBG"><item name = "android:src">@drawable/rectangledark </item></style>
     <style name="BoldFont" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="android:fontFamily">@font/esamanru_bold</item>
     </style>
