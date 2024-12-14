@@ -53,8 +53,10 @@ public class MainActivity extends AppCompatActivity {
         }
 
         initializeComponents();
-        goToMapButton = findViewById(R.id.go_to_map);
+        goToMapButton.findViewById(R.id.go_to_map);
+        goToMapButton.setVisibility(View.GONE);
 
+        setupGoToMapButton();
         setupFragments();
         setupBottomNavigation();
         setupGoToMapButton();
@@ -101,12 +103,10 @@ public class MainActivity extends AppCompatActivity {
                     .replace(R.id.fragment_container, new LoginFragment())
                     .commit();
             bottomNavigationView.setVisibility(View.GONE);
-            goToMapButton.setVisibility(View.GONE);
         } else {
             Login_id = mAuth.getCurrentUser().getEmail();
             showHomeFragment();
             bottomNavigationView.setVisibility(View.VISIBLE);
-            goToMapButton.setVisibility(View.VISIBLE);
         }
     }
 
@@ -208,10 +208,12 @@ public class MainActivity extends AppCompatActivity {
         transaction.replace(R.id.fragment_container, fragment);
         transaction.commit();
 
-        if (fragment instanceof HomeFragment || fragment instanceof MapFragment) {
-            goToMapButton.setVisibility(View.VISIBLE);
-        } else {
-            goToMapButton.setVisibility(View.GONE);
+        if (goToMapButton != null) {
+            if (fragment instanceof HomeFragment || fragment instanceof MapFragment) {
+                goToMapButton.setVisibility(View.VISIBLE);
+            } else {
+                goToMapButton.setVisibility(View.GONE);
+            }
         }
     }
 
