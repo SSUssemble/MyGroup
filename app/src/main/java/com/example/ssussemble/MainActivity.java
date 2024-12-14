@@ -33,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     public static String Login_id = null;
     public static String Login_password = null;
+    private static final int NOTIFICATION_PERMISSION_CODE = 100;
     private static final String TAG = "FCM_Service";
     private ImageButton goToMapButton;
 
