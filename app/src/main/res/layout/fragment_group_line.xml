@@ -18,13 +18,14 @@ app:cardElevation="2dp">
     android:layout_marginTop="4dp"
     android:orientation="horizontal">
 
-    <ImageView
+    <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/cr_profile_image"
-        android:src="@drawable/default_profile"
         android:padding="5dp"
         android:layout_width="70dp"
         android:layout_height="70dp"
-        android:scaleType="centerCrop" />
+        android:scaleType="centerCrop"
+        app:shapeAppearanceOverlay="@style/CircleImageView"
+        android:src="@drawable/default_profile" />
 
     <LinearLayout
         android:layout_width="match_parent"

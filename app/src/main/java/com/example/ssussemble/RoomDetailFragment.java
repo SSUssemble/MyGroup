@@ -12,6 +12,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -24,9 +26,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.HashMap;
 import java.util.Map;
 
-
 public class RoomDetailFragment extends Fragment {
-
     private static final String ARG_ROOM_ID = "room_id";
     private static final String ARG_ROOM_NAME = "room_name";
     private static final String ARG_ROOM_DESCRIPTION = "room_description";
@@ -34,10 +34,11 @@ public class RoomDetailFragment extends Fragment {
     private static final String TAG = "RoomDetailFragment";
 
     private DatabaseReference databaseReference;
-
     private Button joinRequestButton;
     private String roomId;
     private String roomName;
+    private RecyclerView recyclerViewParticipants;
+    private ParticipantAdapter participantAdapter;
 
     public static RoomDetailFragment newInstance(String roomId, String roomName, String roomDescription, String roomComment) {
         RoomDetailFragment fragment = new RoomDetailFragment();
@@ -59,6 +60,7 @@ public class RoomDetailFragment extends Fragment {
         TextView textViewRoomComment = view.findViewById(R.id.textViewRoomComment);
         Button exitRoomButton = view.findViewById(R.id.exitRoom);
         joinRequestButton = view.findViewById(R.id.joinRequestButton);
+        recyclerViewParticipants = view.findViewById(R.id.recyclerViewParticipants);
 
         databaseReference = FirebaseDatabase.getInstance().getReference("rooms");
 
@@ -72,72 +74,96 @@ public class RoomDetailFragment extends Fragment {
             textViewRoomDescription.setText(roomDescription);
             textViewRoomComment.setText(roomComment);
 
-            String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-            DatabaseReference userRef = FirebaseDatabase.getInstance()
-                    .getReference("users")
-                    .child(currentUserId);
-
-            userRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot userSnapshot) {
-                    String userNickname = userSnapshot.child("displayName").getValue(String.class);
-
-                    databaseReference.child(roomId).addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot roomSnapshot) {
-                            String header = roomSnapshot.child("header").getValue(String.class);
-                            boolean isLeader = userNickname.equals(header);
-                            boolean isParticipant = roomSnapshot.child("participants").hasChild(userNickname) || isLeader;
-
-                            exitRoomButton.setEnabled(isParticipant);
-                            joinRequestButton.setEnabled(!isParticipant);
-
-                            exitRoomButton.setOnClickListener(view1 -> {
-                                if (isLeader) {
-                                    databaseReference.child(roomId).removeValue()
-                                            .addOnSuccessListener(aVoid -> {
-                                                FirebaseDatabase.getInstance()
-                                                        .getReference("chatRooms")
-                                                        .child(roomId)
-                                                        .removeValue();
-                                                Toast.makeText(getContext(), "방이 삭제되었습니다.", Toast.LENGTH_SHORT).show();
-                                                getParentFragmentManager().popBackStack();
-                                            });
-                                } else {
-                                    databaseReference.child(roomId).child("participants")
-                                            .child(userNickname)
-                                            .removeValue()
-                                            .addOnSuccessListener(aVoid -> {
-                                                FirebaseDatabase.getInstance()
-                                                        .getReference("chatRooms")
-                                                        .child(roomId)
-                                                        .child("participants")
-                                                        .child(userNickname)
-                                                        .removeValue();
-                                                Toast.makeText(getContext(), "그룹에서 나갔습니다.", Toast.LENGTH_SHORT).show();
-                                                getParentFragmentManager().popBackStack();
-                                            });
-                                }
-                            });
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-                            Log.e(TAG, "Database error: " + error.getMessage());
-                        }
-                    });
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    Log.e(TAG, "Database error: " + error.getMessage());
-                }
-            });
+            setupRecyclerView();
+            loadParticipants();
+            setupExitButton(exitRoomButton);
         }
 
         joinRequestButton.setOnClickListener(v -> sendJoinRequest());
 
         return view;
+    }
+
+    private void setupRecyclerView() {
+        recyclerViewParticipants.setLayoutManager(new LinearLayoutManager(getContext()));
+        participantAdapter = new ParticipantAdapter(this::onParticipantClick);
+        recyclerViewParticipants.setAdapter(participantAdapter);
+    }
+
+    private void loadParticipants() {
+        databaseReference.child(roomId).child("participants")
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        Map<String, String> participants = new HashMap<>();
+                        for (DataSnapshot participantSnapshot : snapshot.getChildren()) {
+                            String nickname = participantSnapshot.getKey();
+                            String uid = participantSnapshot.getValue(String.class);
+                            participants.put(nickname, uid);
+                        }
+                        participantAdapter.updateParticipants(participants);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Log.e(TAG, "참가자 목록 로드 실패", error.toException());
+                    }
+                });
+    }
+
+    private void setupExitButton(Button exitRoomButton) {
+        String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        databaseReference.child(roomId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                String header = snapshot.child("header").getValue(String.class);
+                boolean isLeader = currentUserId.equals(snapshot.child("participants").child(header).getValue(String.class));
+                boolean isParticipant = snapshot.child("participants").hasChild(currentUserId);
+
+                exitRoomButton.setEnabled(isParticipant);
+                joinRequestButton.setEnabled(!isParticipant);
+
+                exitRoomButton.setOnClickListener(v -> {
+                    if (isLeader) {
+                        deleteRoom();
+                    } else {
+                        leaveRoom(currentUserId);
+                    }
+                });
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e(TAG, "방 정보 로드 실패", error.toException());
+            }
+        });
+    }
+
+    private void deleteRoom() {
+        databaseReference.child(roomId).removeValue()
+                .addOnSuccessListener(aVoid -> {
+                    FirebaseDatabase.getInstance().getReference("chatRooms").child(roomId).removeValue();
+                    Toast.makeText(getContext(), "방이 삭제되었습니다.", Toast.LENGTH_SHORT).show();
+                    getParentFragmentManager().popBackStack();
+                });
+    }
+
+    private void leaveRoom(String userId) {
+        databaseReference.child(roomId).child("participants").child(userId).removeValue()
+                .addOnSuccessListener(aVoid -> {
+                    FirebaseDatabase.getInstance().getReference("chatRooms")
+                            .child(roomId).child("participants").child(userId).removeValue();
+                    Toast.makeText(getContext(), "그룹에서 나갔습니다.", Toast.LENGTH_SHORT).show();
+                    getParentFragmentManager().popBackStack();
+                });
+    }
+
+    private void onParticipantClick(String participantNickname, String participantUid) {
+        Fragment participantProfileFragment = ParticipantProfileFragment.newInstance(participantUid);
+        getParentFragmentManager().beginTransaction()
+                .replace(R.id.fragment_container, participantProfileFragment)
+                .addToBackStack(null)
+                .commit();
     }
 
     private void sendJoinRequest() {
@@ -155,7 +181,6 @@ public class RoomDetailFragment extends Fragment {
                     public void onDataChange(@NonNull DataSnapshot userSnapshot) {
                         String requesterNickname = userSnapshot.child("displayName").getValue(String.class);
 
-                        // 참가 요청 데이터 생성
                         DatabaseReference requestsRef = FirebaseDatabase.getInstance().getReference("joinRequests");
                         String requestId = requestsRef.push().getKey();
 
