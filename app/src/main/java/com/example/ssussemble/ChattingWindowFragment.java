@@ -47,7 +47,6 @@ public class ChattingWindowFragment extends Fragment {
     private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     private DatabaseReference databaseReference = firebaseDatabase.getReference();
 
-
     public static ChattingWindowFragment newInstance(String roomId) {
         ChattingWindowFragment fragment = new ChattingWindowFragment();
         Bundle args = new Bundle();
