@@ -10,34 +10,26 @@
         android:orientation="horizontal">
 
         <ImageView
-            android:id="@+id/back_button_image"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:adjustViewBounds="true"
             android:maxWidth="30dp"
             android:maxHeight="30dp"
             android:src="@drawable/back_arrow" />
-
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="새로운 방 만들기"
             android:textSize="24dp"
-            android:theme="@style/BoldFont"
             android:layout_marginLeft="10dp"
             android:textStyle="bold"/>
 
     </LinearLayout>
 
     <EditText
-        android:id="@+id/roomName"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
         android:ems="20"
         android:inputType="text"
-        android:theme="@style/MediumFont"
-        android:layout_marginTop="10dp"
-        android:hint="방 이름을 입력하세요." />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -46,43 +38,26 @@
 
         <Spinner
             android:layout_width="wrap_content"
-            android:layout_height="48dp"
             android:id="@+id/spinner"
-            android:theme="@style/LightFont"
             android:entries="@array/options"/>
 
         <EditText
             android:id="@+id/editTextNumberDecimal"
             android:layout_width="176dp"
             android:layout_height="57dp"
-            android:theme="@style/LightFont"
             android:ems="10"
-            android:hint="최대 인원 입력"
             android:inputType="numberDecimal" />
     </LinearLayout>
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="방 설명 입력"
-        android:layout_marginTop="8dp"
-        android:textSize="20dp"
-        android:theme="@style/MediumFont"/>
-
     <EditText
-        android:id="@+id/roomComment"
         android:layout_width="match_parent"
         android:layout_height="164dp"
         android:ems="10"
         android:inputType="text"
-        android:theme="@style/LightFont"
-        android:hint="방 설명을 입력하세요." />
 
     <Button
         android:id="@+id/button2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="다음"
-        android:theme="@style/LightFont" />
 
 </LinearLayout>

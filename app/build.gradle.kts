@@ -33,17 +33,9 @@ android {
     buildFeatures {
         viewBinding = true
     }
-    packaging {
-        resources {
-            excludes.add("META-INF/NOTICE.md")
-            excludes.add("META-INF/LICENSE.md")
-            excludes.add("META-INF/DEPENDENCIES")
-        }
-    }
 }
 
 dependencies {
-    implementation("com.naver.maps:map-sdk:3.20.0")
     implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
     implementation("com.google.firebase:firebase-analytics")
     implementation(libs.appcompat)
@@ -52,7 +44,6 @@ dependencies {
     implementation(libs.constraintlayout)
     implementation(libs.firebase.database)
     implementation(libs.volley)
-    implementation(libs.transport.api)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
@@ -60,6 +51,5 @@ dependencies {
     implementation("com.github.bumptech.glide:glide:4.12.0")
     implementation("com.google.firebase:firebase-messaging:23.4.0")
     implementation("com.google.firebase:firebase-database:20.3.0")
-    implementation("com.sun.mail:android-mail:1.6.7")
-    implementation("com.sun.mail:android-activation:1.6.7")
+    implementation("com.android.volley:volley:1.2.1")
 }

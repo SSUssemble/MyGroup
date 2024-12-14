@@ -5,8 +5,24 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity"
+    tools:context="com.example.ssussemble.MainActivity"
     android:id="@+id/fragment_container">
+
+    <!-- 상단에 고정된 검색 바 -->
+
+<!--    <ScrollView-->
+<!--        android:id="@+id/scroll_view"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent"-->
+<!--        android:layout_below="@id/search_bar"> &lt;!&ndash; 검색 바 아래에 배치 &ndash;&gt;-->
+
+<!--        <LinearLayout-->
+<!--            android:id="@+id/room_container"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:orientation="vertical"></LinearLayout>-->
+<!--    </ScrollView>-->
+
 
     <LinearLayout
         android:id="@+id/search_bar"
@@ -20,46 +36,42 @@
         <EditText
             android:id="@+id/search_edit_text"
             android:layout_width="0dp"
-            android:layout_height="48dp"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
             android:hint="검색"
-            android:theme="@style/MediumFont"
             android:padding="10dp" />
 
-        <Button
+        <TextView
             android:id="@+id/searchClearButton"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="@android:color/transparent"
-            android:padding="5dp"
-            android:text="X"
-            android:textColor="@color/black"
-            android:textSize="15sp" />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:text="x"
+            android:textSize="15dp" />
     </LinearLayout>
+
 
     <Button
         android:id="@+id/button3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="2dp"
-        android:layout_marginTop="-10dp"
+        android:layout_marginTop="4dp"
         android:padding="15dp"
-        android:text=" + 그룹 생성하기"
-        android:theme="@style/MediumFont"
+        android:text=" + 방 생성하기"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/search_bar" />
+        app:layout_constraintTop_toBottomOf="@+id/search_bar"
+
+        />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewClassRoom"
-        android:layout_marginTop="5dp"
         android:layout_width="408dp"
-        android:layout_height="411dp"
+        android:layout_height="wrap_content"
         app:layoutManager="LinearLayoutManager"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/button3"
         tools:context=".HomeFragment"
-        tools:listitem="@layout/button_layout" />
-
+        tools:listitem="@layout/button_layout">
+    </androidx.recyclerview.widget.RecyclerView>
 </androidx.constraintlayout.widget.ConstraintLayout>

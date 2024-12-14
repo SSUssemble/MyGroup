@@ -1,5 +1,5 @@
 [versions]
-agp = "8.7.3"
+agp = "8.7.2"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
@@ -11,7 +11,6 @@ firebaseDatabase = "21.0.0"
 firebaseAuth = "23.1.0"
 firebaseMessaging = "24.1.0"
 volley = "1.2.1"
-transportApi = "3.0.0"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -25,7 +24,6 @@ firebase-database = { group = "com.google.firebase", name = "firebase-database",
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth", version.ref = "firebaseAuth" }
 firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging", version.ref = "firebaseMessaging" }
 volley = { group = "com.android.volley", name = "volley", version.ref = "volley" }
-transport-api = { group = "com.google.android.datatransport", name = "transport-api", version.ref = "transportApi" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
