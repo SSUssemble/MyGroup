@@ -39,6 +39,7 @@ public class ProfileFragment extends Fragment {
     private FragmentProfileBinding binding;
     private TextView groupCountText;
     private DatabaseReference databaseReference;
+    private TextView mySchedule;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -46,6 +47,7 @@ public class ProfileFragment extends Fragment {
         View view = binding.getRoot();
 
         groupCountText = view.findViewById(R.id.groupCount);
+        mySchedule = view.findViewById(R.id.mySchedule);
         profileImageView = binding.profileImageView;
         databaseReference = FirebaseDatabase.getInstance().getReference();
 
@@ -64,6 +66,18 @@ public class ProfileFragment extends Fragment {
             public void onClick(View view) {
                 Intent intent = new Intent(getActivity(), AppSetting.class);
                 startActivity(intent);
+            }
+        });
+
+        mySchedule.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Fragment ScheduleFragment = new ScheduleFragment();
+
+                ScheduleFragment.getParentFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_container, new ScheduleFragment())
+                        .addToBackStack(null)
+                        .commit();
             }
         });
 

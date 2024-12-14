@@ -11,6 +11,7 @@
         android:id="@+id/search_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
         android:orientation="horizontal"
         android:padding="10dp"
         app:layout_constraintStart_toStartOf="parent"
@@ -19,20 +20,19 @@
         <EditText
             android:id="@+id/search_edit_text"
             android:layout_width="0dp"
-            android:layout_height="48dp"
+            android:layout_height="40dp"
             android:layout_weight="1"
             android:hint="검색"
-            android:padding="10dp"
-            android:theme="@style/MediumFont" />
+            android:theme="@style/MediumFont"
+            android:padding="10dp" />
 
         <Button
             android:id="@+id/searchClearButton"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:layout_margin="8dp"
             android:background="@android:color/transparent"
-            android:padding="8dp"
-            android:text="x"
+            android:padding="5dp"
+            android:text="X"
             android:textColor="@color/black"
             android:textSize="15sp" />
     </LinearLayout>
@@ -41,7 +41,8 @@
         android:id="@+id/button3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
+        android:layout_marginTop="0dp"
+        android:layout_marginStart="2dp"
         android:padding="15dp"
         android:text=" + 그룹 생성하기"
         android:theme="@style/MediumFont"
@@ -50,8 +51,9 @@
 
     <com.naver.maps.map.MapView
         android:id="@+id/navermap"
+        android:layout_marginTop="5dp"
         android:layout_width="match_parent"
-        android:layout_height="411dp"
+        android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
