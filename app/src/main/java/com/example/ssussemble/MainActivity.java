@@ -30,6 +30,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
+    private ImageButton goToMapButton;
     public static String Login_id = null;
     public static String Login_password = null;
     private static final int NOTIFICATION_PERMISSION_CODE = 100;
@@ -52,6 +53,9 @@ public class MainActivity extends AppCompatActivity {
         }
 
         initializeComponents();
+        goToMapButton = findViewById(R.id.go_to_map);
+        goToMapButton.setVisibility(View.GONE);
+
         setupFragments();
         setupBottomNavigation();
         setupGoToMapButton();
@@ -152,7 +156,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupGoToMapButton() {
-        ImageButton goToMapButton = findViewById(R.id.go_to_map);
         goToMapButton.setOnClickListener(view -> {
             Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
 
@@ -191,7 +194,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
     private void showHomeFragment() {
         getSupportFragmentManager()
                 .beginTransaction()
@@ -203,6 +205,14 @@ public class MainActivity extends AppCompatActivity {
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.replace(R.id.fragment_container, fragment);
         transaction.commit();
+
+        if (goToMapButton != null) {
+            if (fragment instanceof HomeFragment || fragment instanceof MapFragment) {
+                goToMapButton.setVisibility(View.VISIBLE);
+            } else {
+                goToMapButton.setVisibility(View.GONE);
+            }
+        }
     }
 
     public void navigateToChatRoom(String roomId) {
