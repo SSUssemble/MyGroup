@@ -26,6 +26,7 @@ public class OtherProfileFragment extends Fragment {
     private String userId; // 클릭된 유저의 ID
     private ImageView profileImageView, timeTableView;
     private TextView userNameText, userEmailText, userDepartmentText, groupCountText;
+    private ImageView backButton;
 
     private DatabaseReference databaseReference;
 
@@ -58,6 +59,12 @@ public class OtherProfileFragment extends Fragment {
         userEmailText = view.findViewById(R.id.userEmail);
         userDepartmentText = view.findViewById(R.id.userDepartment);
         groupCountText = view.findViewById(R.id.groupCount);
+        backButton = view.findViewById(R.id.back_button_image);
+
+        backButton.setOnClickListener(view1 -> {
+                getParentFragmentManager().popBackStack();
+        });
+
 
         loadUserInfo();
         return view;
