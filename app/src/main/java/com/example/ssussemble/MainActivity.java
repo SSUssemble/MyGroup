@@ -76,10 +76,10 @@ public class MainActivity extends AppCompatActivity {
                     Log.d(TAG, "FCM 토큰: " + token);
 
                     if (Login_id != null) {
-                        String userKey = Login_id.replace(".", "_dot_").replace("@", "_at_");
+                        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
                         DatabaseReference userRef = FirebaseDatabase.getInstance().getReference()
                                 .child("users")
-                                .child(userKey)
+                                .child(userId)
                                 .child("fcmToken");
 
                         userRef.setValue(token)
