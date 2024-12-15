@@ -33,9 +33,7 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     public static String Login_id = null;
     public static String Login_password = null;
-    private static final int NOTIFICATION_PERMISSION_CODE = 100;
     private static final String TAG = "FCM_Service";
-    private ImageButton goToMapButton;
 
     private List<Fragment> fragmentList = new ArrayList<>();
     private FragmentManager fragmentManager;
@@ -54,11 +52,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
         initializeComponents();
-        goToMapButton = findViewById(R.id.go_to_map);
-
         setupFragments();
         setupBottomNavigation();
-        setupGoToMapButton();
         handleLoginData();
         checkLoginStatus();
         initializeFCM();
@@ -102,12 +97,10 @@ public class MainActivity extends AppCompatActivity {
                     .replace(R.id.fragment_container, new LoginFragment())
                     .commit();
             bottomNavigationView.setVisibility(View.GONE);
-            goToMapButton.setVisibility(View.GONE);
         } else {
             Login_id = mAuth.getCurrentUser().getEmail();
             showHomeFragment();
             bottomNavigationView.setVisibility(View.VISIBLE);
-            goToMapButton.setVisibility(View.VISIBLE);
         }
     }
 
@@ -147,20 +140,6 @@ public class MainActivity extends AppCompatActivity {
         bottomNavigationView.setOnItemSelectedListener(item -> handleBottomNavigationItemSelected(item));
     }
 
-    private void setupGoToMapButton() {
-        goToMapButton.setOnClickListener(view -> {
-            Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
-
-            if (currentFragment instanceof MapFragment) {
-                // 현재 MapFragment가 보이는 경우 -> HomeFragment로 전환
-                replaceFragment(new HomeFragment());
-            } else {
-                // 현재 HomeFragment 또는 다른 Fragment가 보이는 경우 -> MapFragment로 전환
-                replaceFragment(new MapFragment());
-            }
-        });
-    }
-
     private boolean handleBottomNavigationItemSelected(MenuItem item) {
         int itemId = item.getItemId();
 
@@ -198,12 +177,6 @@ public class MainActivity extends AppCompatActivity {
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.replace(R.id.fragment_container, fragment);
         transaction.commit();
-
-        if (fragment instanceof HomeFragment || fragment instanceof MapFragment) {
-            goToMapButton.setVisibility(View.VISIBLE);
-        } else {
-            goToMapButton.setVisibility(View.GONE);
-        }
     }
 
     public void navigateToChatRoom(String roomId) {
