@@ -6,6 +6,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -15,12 +16,14 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.SnapHelper;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.ssussemble.databinding.FragmentChattingWindowBinding;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -112,18 +115,33 @@ public class ChattingWindowFragment extends Fragment {
         if (!message.trim().isEmpty()) {
             long timeStamp = System.currentTimeMillis();
 
-            String nickName = MainActivity.Login_id.substring(0, MainActivity.Login_id.indexOf("@"));
-            ChatData chatData = new ChatData(nickName, message, timeStamp);
+            DatabaseReference userRef = FirebaseDatabase.getInstance()
+                    .getReference("users")
+                    .child(FirebaseAuth.getInstance().getCurrentUser().getUid());
 
-            DatabaseReference messageRef = databaseReference.child("chatRooms")
-                    .child(roomId)
-                    .child("chats")
-                    .push();
+            userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot userSnapshot) {
+                    String nickname = userSnapshot.child("displayName").getValue(String.class);
 
-            messageRef.setValue(chatData).addOnSuccessListener(aVoid -> {
-                sendFCMNotification(message);
-                Log.d(TAG, "메시지 전송");
-                binding.ChattingMessage.setText("");
+                    ChatData chatData = new ChatData(nickname, message, timeStamp);
+
+                    DatabaseReference messageRef = databaseReference.child("chatRooms")
+                            .child(roomId)
+                            .child("chats")
+                            .push();
+
+                    messageRef.setValue(chatData).addOnSuccessListener(aVoid -> {
+                        sendFCMNotification(message);
+                        Log.d(TAG, "메시지 전송");
+                        binding.ChattingMessage.setText("");
+                    });
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Toast.makeText(requireContext(), "사용자 정보 로드 실패", Toast.LENGTH_SHORT).show();
+                }
             });
         }
     }
@@ -139,10 +157,11 @@ public class ChattingWindowFragment extends Fragment {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot participantSnapshot : snapshot.child("participants").getChildren()) {
                     String participantName = participantSnapshot.getKey();
-                    String participantId = participantName + "_at_soongsil_dot_ac_dot_kr";
+                    String participantUid = String.valueOf(participantSnapshot.getValue());
+                    DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users");
 
                     DatabaseReference fcmRef = databaseReference.child("users")
-                            .child(participantId)
+                            .child(participantUid)
                             .child("fcmToken");
 
                     fcmRef.addListenerForSingleValueEvent(new ValueEventListener() {

@@ -1,13 +1,16 @@
 package com.example.ssussemble;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -24,9 +27,9 @@ import java.util.TimeZone;
 public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final int VIEW_TYPE_MINE = 1;
     private static final int VIEW_TYPE_OTHER = 2;
+    String nickname;
 
     private List<ChatData> chatList = new ArrayList<>();
-    private static DatabaseReference ref;
 
     public ChatAdapter() {
     }
@@ -62,8 +65,22 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public int getItemViewType(int position) {
         ChatData chat = chatList.get(position);
 
-        String nickName = MainActivity.Login_id.substring(0, MainActivity.Login_id.indexOf("@"));
-        if (chat.getUserName().equals(nickName)) {
+        DatabaseReference userRef = FirebaseDatabase.getInstance()
+                .getReference("users")
+                .child(FirebaseAuth.getInstance().getCurrentUser().getUid());
+
+        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot userSnapshot) {
+                nickname = userSnapshot.child("displayName").getValue(String.class);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+            }
+        });
+
+        if (chat.getUserName().equals(nickname)) {
             return VIEW_TYPE_MINE;
         } else {
             return VIEW_TYPE_OTHER;
@@ -121,5 +138,4 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             }
         }
     }
-
 }
