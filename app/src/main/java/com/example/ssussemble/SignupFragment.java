@@ -98,7 +98,7 @@ public class SignupFragment extends Fragment {
                     })
                     .addOnFailureListener(e -> {
                         showLoading(false);
-                        showError("회원가입 실패: " + e.getMessage());
+                        showError("이미 존재하는 계정입니다!");
                     });
         }
 
