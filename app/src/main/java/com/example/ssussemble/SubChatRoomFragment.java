@@ -124,7 +124,7 @@ public class SubChatRoomFragment extends Fragment {
     private void createSubChatRoom(String title) {
         String subRoomId = "sub_" + parentRoomId + "_" + System.currentTimeMillis();
 
-        databaseReference.child("chatRooms").child(subRoomId)
+        databaseReference.child("chatRooms").child(title)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -141,7 +141,7 @@ public class SubChatRoomFragment extends Fragment {
                                             roomData.put("participants", participantsSnapshot.getValue());
                                             roomData.put("created_at", ServerValue.TIMESTAMP);
 
-                                            databaseReference.child("chatRooms").child(subRoomId)
+                                            databaseReference.child("chatRooms").child(title)
                                                     .setValue(roomData)
                                                     .addOnSuccessListener(aVoid -> {
                                                         Fragment chatFragment = ChattingWindowFragment.newInstance(subRoomId);

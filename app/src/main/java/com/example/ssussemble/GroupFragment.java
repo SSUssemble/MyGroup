@@ -90,15 +90,8 @@ public class GroupFragment extends Fragment {
                                         chatRoom.group_id.add(participantSnapshot.getKey());
                                     }
                                     chatRoom.Chatting_room_id = roomSnapshot.child("name").getValue(String.class);
-                                } else {
-                                    chatRoom.isthis_chatroom_group = false;
-                                    for (DataSnapshot participantSnapshot : participantsSnapshot.getChildren()) {
-                                        String participantNickname = participantSnapshot.getKey();
-                                        if (!participantNickname.equals(currentUserNickname)) {
-                                            chatRoom.id2 = participantNickname;
-                                            break;
-                                        }
-                                    }
+                                } else if (roomSnapshot.child("type").getValue(String.class).equals("sub")) {
+                                    continue;
                                 }
 
                                 chattingRoomList.add(chatRoom);

@@ -78,13 +78,8 @@ public class ChattingWindowFragment extends Fragment {
 
             binding.navigationView.setNavigationItemSelectedListener(item -> {
                 int itemId = item.getItemId();
-                if (itemId == R.id.menu_drawer_time) {
-                    // 회의 시간 정하기 구현
-                    drawerLayout.closeDrawer(Gravity.RIGHT);
-                    return true;
-                }
-                else if (itemId == R.id.menu_drawer_sub) {
-                    // 서브 채팅방 프래그먼트로 이동
+
+                if (itemId == R.id.menu_drawer_sub) {
                     Fragment subChatFragment = SubChatRoomFragment.newInstance(roomId);
                     getParentFragmentManager().beginTransaction()
                             .replace(R.id.fragment_container, subChatFragment)
