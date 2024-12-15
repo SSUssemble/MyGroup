@@ -52,8 +52,8 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewClassRoom"
         android:layout_marginTop="5dp"
-        android:layout_width="408dp"
-        android:layout_height="411dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         app:layoutManager="LinearLayoutManager"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
@@ -61,5 +61,17 @@
         app:layout_constraintTop_toBottomOf="@+id/button3"
         tools:context=".HomeFragment"
         tools:listitem="@layout/button_layout" />
+
+    <ImageView
+        android:id="@+id/go_to_map"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_marginLeft="6dp"
+        android:contentDescription="transfer_map"
+        android:clickable="true"
+        android:scaleType="centerInside"
+        android:src="@drawable/go_map"
+        app:layout_constraintStart_toEndOf="@+id/button3"
+        app:layout_constraintTop_toTopOf="@+id/button3" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

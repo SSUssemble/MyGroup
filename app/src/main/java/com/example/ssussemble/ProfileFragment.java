@@ -35,14 +35,15 @@ public class ProfileFragment extends Fragment {
     private FirebaseAuth mAuth;
     private static final String TAG = "ProfileFragment";
     private ImageView profileImageView;
+    private ImageView schedule;
     private FragmentProfileBinding binding;
     private TextView groupCountText;
     private DatabaseReference databaseReference;
-    private TextView mySchedule;
     private StorageReference storageReference;
 
     // ActivityResultLauncher 초기화
     private ActivityResultLauncher<Intent> imagePickerLauncher;
+    private ActivityResultLauncher<Intent> schedulePickerLauncher;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -61,6 +62,18 @@ public class ProfileFragment extends Fragment {
                 }
         );
 
+        schedulePickerLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                        Uri imageUri = result.getData().getData();
+                        if (imageUri != null) {
+                            uploadScheduleToFirebase(imageUri);
+                        }
+                    }
+                }
+        );
+
     }
 
     @Override
@@ -69,27 +82,20 @@ public class ProfileFragment extends Fragment {
         View view = binding.getRoot();
 
         groupCountText = view.findViewById(R.id.groupCount);
-        mySchedule = view.findViewById(R.id.mySchedule);
         profileImageView = binding.profileImageView;
+        schedule = binding.timeTableView;
         databaseReference = FirebaseDatabase.getInstance().getReference();
         storageReference = FirebaseStorage.getInstance().getReference("profile_images");
 
         // 이미지 선택 기능 연결
-        profileImageView.setOnClickListener(v -> openImagePicker());
+        profileImageView.setOnClickListener(v -> openProfileImagePicker());
+        schedule.setOnClickListener(v -> openScheduleImagePicker());
 
         // 설정 페이지 이동
         ImageView toSetting = binding.settingButton;
         toSetting.setOnClickListener(view1 -> {
             Intent intent = new Intent(getActivity(), AppSetting.class);
             startActivity(intent);
-        });
-
-        mySchedule.setOnClickListener(view12 -> {
-            Fragment scheduleFragment = new ScheduleFragment();
-            requireActivity().getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, scheduleFragment)
-                    .addToBackStack(null)
-                    .commit();
         });
 
         loadProfileImage();
@@ -226,11 +232,18 @@ public class ProfileFragment extends Fragment {
     }
 
 
-    private void openImagePicker() {
+    private void openProfileImagePicker() {
         Intent intent = new Intent();
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
         imagePickerLauncher.launch(Intent.createChooser(intent, "Select Picture"));
+    }
+
+    private void openScheduleImagePicker() {
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        schedulePickerLauncher.launch(Intent.createChooser(intent, "Select Schedule Picture"));
     }
 
     private void uploadImageToFirebase(Uri imageUri) {
@@ -251,11 +264,36 @@ public class ProfileFragment extends Fragment {
         });
     }
 
+    private void uploadScheduleToFirebase(Uri imageUri) {
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        StorageReference scheduleRef = storageReference.child("schedule_images").child(userId + "_schedule.jpg"); // schedule_images 경로로 설정
+
+        scheduleRef.putFile(imageUri).addOnSuccessListener(taskSnapshot -> {
+            scheduleRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                saveScheduleImageUriToDatabase(uri.toString());
+                Glide.with(this)
+                        .load(uri)
+                        .placeholder(R.drawable.baseline_image_24)
+                        .into(schedule);
+            });
+        }).addOnFailureListener(e -> {
+            Toast.makeText(getContext(), "시간표 이미지 업로드 실패: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        });
+    }
+
     private void saveProfileImageUriToDatabase(String imageUrl) {
         String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(userId);
         userRef.child("profileImageUrl").setValue(imageUrl)
                 .addOnSuccessListener(aVoid -> Toast.makeText(getContext(), "프로필 이미지 업데이트 성공", Toast.LENGTH_SHORT).show())
                 .addOnFailureListener(e -> Toast.makeText(getContext(), "프로필 이미지 업데이트 실패: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+    }
+
+    private void saveScheduleImageUriToDatabase(String imageUrl) {
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(userId);
+        userRef.child("scheduleUrl").setValue(imageUrl)
+                .addOnSuccessListener(aVoid -> Toast.makeText(getContext(), "시간표 이미지 업데이트 성공", Toast.LENGTH_SHORT).show())
+                .addOnFailureListener(e -> Toast.makeText(getContext(), "시간표 이미지 업데이트 실패: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 }
