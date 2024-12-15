@@ -303,7 +303,7 @@ public class OtherProfileFragment extends Fragment {
                     if (timeTableImageUrl != null) {
                         Glide.with(OtherProfileFragment.this)
                                 .load(timeTableImageUrl)
-                                .placeholder(R.drawable.baseline_image_24)
+                                .placeholder(R.drawable.default_schedule)
                                 .into(timeTableView);
                     }
                 }
