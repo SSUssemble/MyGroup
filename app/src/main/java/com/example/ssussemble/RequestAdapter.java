@@ -10,6 +10,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.database.DatabaseReference;
@@ -46,12 +47,21 @@ public class RequestAdapter extends RecyclerView.Adapter<RequestAdapter.RequestV
         holder.senderName.setText(request.getRequesterNickname());
         if (isReceivedRequest) {
             holder.buttonLayout.setVisibility(View.VISIBLE);
-            holder.senderName.setVisibility(View.VISIBLE);
+            holder.senderName.setOnClickListener(v -> {
+                Context context = contextRef.get();
+                if (context != null) {
+                    Fragment participantProfileFragment = OtherProfileFragment.newInstance(request.getRequesterId());
+                    ((MainActivity) context).getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.fragment_container, participantProfileFragment)
+                            .addToBackStack(null)
+                            .commit();
+                }
+            });
             holder.acceptButton.setOnClickListener(v -> handleAccept(request, holder.getAdapterPosition()));
             holder.rejectButton.setOnClickListener(v -> handleReject(request, holder.getAdapterPosition()));
         } else {
+            holder.senderName.setText("수락 대기중"); // 굳이 별도의 텍스트 만들 필요 없으므로 보낸 요청일시 수락 대기중으로 설정
             holder.buttonLayout.setVisibility(View.GONE);
-            holder.senderName.setVisibility(View.GONE);
         }
     }
 
