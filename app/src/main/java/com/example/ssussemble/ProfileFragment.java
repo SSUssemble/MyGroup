@@ -249,7 +249,7 @@ public class ProfileFragment extends Fragment {
                 if (scheduleUrl != null) {
                     Glide.with(ProfileFragment.this)
                             .load(scheduleUrl)
-                            .placeholder(R.drawable.baseline_image_24)
+                            .placeholder(R.drawable.default_schedule)
                             .into(schedule);
                 } else {
                     Log.e(TAG, "Profile image URL is null");
@@ -305,7 +305,7 @@ public class ProfileFragment extends Fragment {
                 saveScheduleImageUriToDatabase(uri.toString());
                 Glide.with(this)
                         .load(uri)
-                        .placeholder(R.drawable.baseline_image_24)
+                        .placeholder(R.drawable.default_schedule)
                         .into(schedule);
             });
         }).addOnFailureListener(e -> {
