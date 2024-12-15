@@ -1,42 +1,88 @@
 <?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-
-    <TextView
-        android:id="@+id/buttonName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    android:layout_height="50dp"
+    android:layout_marginBottom="5dp"
+    android:layout_marginTop="2dp"
+    app:cardBackgroundColor="#FCF6F5"
+    app:cardCornerRadius="100dp"
+    app:cardElevation="2dp">
 
     <LinearLayout
-        android:id="@+id/userNumList"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="4dp">
 
-        <TextView
-            android:id="@+id/current_user_num"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="10dp"
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-        <TextView
-            android:id="@+id/userNum"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="10dp"
+            <TextView
+                android:id="@+id/buttonName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_marginStart="15dp"
+                android:text="방 이름"
+                android:textSize="18dp"
+                android:theme="@style/MediumFont" />
 
-        <TextView
-            android:id="@+id/max_user_num"
-            android:layout_width="wrap_content"
+            <LinearLayout
+                android:id="@+id/userNumList"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="10dp"
+                android:orientation="horizontal"
+                android:theme="@style/LightFont">
+
+                <TextView
+                    android:id="@+id/current_user_num"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="10dp"
+                    android:text="1" />
+
+                <TextView
+                    android:id="@+id/userNum"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="10dp"
+                    android:text="/" />
+
+                <TextView
+                    android:id="@+id/max_user_num"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="4" />
+            </LinearLayout>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="4dp">
+
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_marginStart="15dp"
+                android:text="카테고리"
+                android:theme="@style/LightFont" />
+
+            <TextView
+                android:id="@+id/header_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="10dp"
+                android:text="사용자명"
+                android:theme="@style/LightFont" />
+        </RelativeLayout>
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-
-    <TextView
-        android:id="@+id/header_name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+</androidx.cardview.widget.CardView>

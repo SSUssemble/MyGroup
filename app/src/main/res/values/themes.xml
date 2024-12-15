@@ -9,11 +9,14 @@
         <item name="colorSecondaryVariant">@color/white</item>
         <item name="colorOnSecondary">@color/white</item>
     </style>
+    <style name="CircleImageView" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
     <style name="BackgroundColor"><item name="android:background">@color/white</item></style>
     <style name="itemColor"><item name="android:background">@color/dark_white</item></style>
     <style name="textColor"><item name="android:background">@color/black</item></style>
     <style name="SunOrMoon"><item name ="android:src">@drawable/thumbfalse</item></style>
-    <style name="SunOrMoonBG"><item name = "android:src">@drawable/rectangle </item></style>
     <style name="BoldFont" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="android:fontFamily">@font/esamanru_bold</item>
         <item name="android:textSize">30dp</item>

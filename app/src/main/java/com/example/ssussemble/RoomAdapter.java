@@ -63,12 +63,14 @@
 
 package com.example.ssussemble;
 
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -92,8 +94,6 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.RoomViewHolder
         return new RoomViewHolder(view);
     }
 
-
-
     @Override
     public void onBindViewHolder(@NonNull RoomViewHolder holder, int position) {
         Room room = roomList.get(position);
@@ -101,13 +101,18 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.RoomViewHolder
         holder.roomDescription.setText(room.getDescription());
         holder.roomHeader.setText(room.getHeader());
         holder.roomUserNumMax.setText(room.getUserNumMax());
+        holder.roomUserNumCurr.setText(String.valueOf(room.getCurrentParticipants()));
+
+        CardView cardView = (CardView) holder.itemView;
+        cardView.setCardBackgroundColor(getCategoryColor(room.getDescription()));
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 FragmentActivity activity = (FragmentActivity) v.getContext();
                 FragmentManager fragmentManager = activity.getSupportFragmentManager();
-                RoomDetailFragment roomDetailFragment = RoomDetailFragment.newInstance(room.getId() ,room.getName(), room.getDescription());
+                RoomDetailFragment roomDetailFragment =
+                        RoomDetailFragment.newInstance(room.getId(), room.getName(), room.getDescription(), room.getComment());
 
                 fragmentManager.beginTransaction()
                         .replace(R.id.fragment_container, roomDetailFragment)
@@ -115,6 +120,23 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.RoomViewHolder
                         .commit();
             }
         });
+    }
+
+    private int getCategoryColor(String category) {
+        switch (category) {
+            case "팀플":
+                return Color.parseColor("#81BFDA");
+            case "대회":
+                return Color.parseColor("#FADA7A");
+            case "스터디":
+                return Color.parseColor("#90EE90");
+            case "미팅":
+                return Color.parseColor("#FFB6C1");
+            case "기타":
+                return Color.parseColor("#FCF6F5");
+            default:
+                return Color.parseColor("#FFFFFF");
+        }
     }
 
     @Override
@@ -127,6 +149,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.RoomViewHolder
         TextView roomDescription;
         TextView roomHeader;
         TextView roomUserNumMax;
+        TextView roomUserNumCurr;
 
         public RoomViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -134,7 +157,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.RoomViewHolder
             roomDescription = itemView.findViewById(R.id.textView);
             roomHeader = itemView.findViewById(R.id.header_name);
             roomUserNumMax = itemView.findViewById(R.id.max_user_num);
+            roomUserNumCurr = itemView.findViewById(R.id.current_user_num);
         }
     }
 }
-

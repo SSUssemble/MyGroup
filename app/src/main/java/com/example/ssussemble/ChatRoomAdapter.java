@@ -41,12 +41,6 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHo
             } else {
                 holder.friend_id.setText(chatRoom.Chatting_room_id);
             }
-        } else {
-            if (chatRoom.id1 != null && chatRoom.id1.equals(MainActivity.Login_id)) {
-                holder.friend_id.setText(chatRoom.id2);
-            } else {
-                holder.friend_id.setText(chatRoom.id1);
-            }
         }
 
         holder.last_text.setText(chatRoom.last_message != null ? chatRoom.last_message : "");
