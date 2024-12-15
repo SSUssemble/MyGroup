@@ -27,10 +27,10 @@ import java.util.TimeZone;
 public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final int VIEW_TYPE_MINE = 1;
     private static final int VIEW_TYPE_OTHER = 2;
-    String nickname;
 
     private List<ChatData> chatList = new ArrayList<>();
 
+    String nickname;
     public ChatAdapter() {
     }
 
