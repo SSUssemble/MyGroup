@@ -73,6 +73,7 @@ public class HomeFragment extends Fragment {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 roomList.clear(); // 기존 데이터 초기화
+                allRooms.clear();
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     Room room = snapshot.getValue(Room.class); // Firebase 데이터를 Room 객체로 변환
                     if (room != null) {
@@ -82,6 +83,7 @@ public class HomeFragment extends Fragment {
                         room.setParticipants(participants);
 
                         roomList.add(room); // roomList에 추가
+                        allRooms.add(room);
                     }
                 }
                 roomAdapter.notifyDataSetChanged(); // RecyclerView 업데이트
