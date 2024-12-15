@@ -159,6 +159,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                         marker.setCaptionText(room.getName());
                         marker.setMap(naverMap);
 
+                        marker.setOnClickListener(overlay -> {
+                            navigateToRoomDetail(room);
+                            return true;
+                        });
+
                         markerList.add(marker);
                     }
                 }
@@ -169,6 +174,20 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 Toast.makeText(requireContext(), "방 정보를 불러오는 데 실패했습니다.", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void navigateToRoomDetail(Room room) {
+        RoomDetailFragment fragment = RoomDetailFragment.newInstance(
+                room.getId(),
+                room.getName(),
+                room.getDescription(),
+                room.getComment()
+        );
+
+        getParentFragmentManager().beginTransaction()
+                .replace(R.id.fragment_container, fragment)
+                .addToBackStack(null)
+                .commit();
     }
 
     @Override
