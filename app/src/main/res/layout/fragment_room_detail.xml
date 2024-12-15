@@ -3,17 +3,20 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_weight="1"
     android:padding="16dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:orientation="vertical">
 
         <TextView
             android:id="@+id/textViewRoomName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:textSize="24sp"
             android:text="방 이름"
             android:theme="@style/BoldFont"
@@ -23,6 +26,7 @@
             android:id="@+id/textViewRoomDescription"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:text="카테고리"
             android:theme="@style/LightFont"
             android:textSize="16sp" />
@@ -30,6 +34,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:text="그룹 설명"
             android:theme="@style/MediumFont"
             android:textSize="16sp"
@@ -38,7 +43,8 @@
 
         <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="200dp">
+            android:layout_height="200dp"
+            android:layout_weight="1">
             <TextView
                 android:id="@+id/textViewRoomComment"
                 android:layout_width="match_parent"
@@ -51,6 +57,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:text="그룹 멤버 목록"
             android:theme="@style/MediumFont"
             android:layout_marginTop="16dp"
@@ -60,11 +67,13 @@
             android:id="@+id/recyclerViewParticipants"
             android:layout_width="match_parent"
             android:layout_height="200dp"
+            android:layout_weight="1"
             android:layout_marginTop="12dp" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:orientation="horizontal"
             android:layout_marginTop="20dp"
             android:layout_gravity="center">
@@ -73,6 +82,7 @@
                 android:id="@+id/joinRequestButton"
                 android:layout_width="180dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:text="그룹 참가 신청하기"
                 android:layout_gravity="left"
                 android:textSize="16sp"
@@ -83,6 +93,7 @@
                 android:id="@+id/exitRoom"
                 android:layout_width="180dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:text="그룹 나가기"
                 android:layout_gravity="right"
                 android:theme="@style/MediumFont"

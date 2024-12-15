@@ -22,12 +22,14 @@
             android:theme="@style/BoldFont" />
 
         <TextView
-            android:id="@+id/requestStatusText"
+            android:id="@+id/senderName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:clickable="true"
+            android:focusable="true"
             android:layout_marginTop="4dp"
             android:theme="@style/MediumFont"
-            android:textColor="@android:color/darker_gray" />
+            android:textColor="@android:color/darker_gray"/>
 
         <LinearLayout
             android:id="@+id/buttonLayout"

@@ -43,14 +43,15 @@ public class RequestAdapter extends RecyclerView.Adapter<RequestAdapter.RequestV
     public void onBindViewHolder(@NonNull RequestViewHolder holder, int position) {
         JoinRequest request = requests.get(position);
         holder.roomNameText.setText(request.getRoomName());
-        holder.requestStatusText.setText(getStatusText(request.getStatus()));
-
-        if (isReceivedRequest && "pending".equals(request.getStatus())) {
+        holder.senderName.setText(request.getRequesterNickname());
+        if (isReceivedRequest) {
             holder.buttonLayout.setVisibility(View.VISIBLE);
+            holder.senderName.setVisibility(View.VISIBLE);
             holder.acceptButton.setOnClickListener(v -> handleAccept(request, holder.getAdapterPosition()));
             holder.rejectButton.setOnClickListener(v -> handleReject(request, holder.getAdapterPosition()));
         } else {
             holder.buttonLayout.setVisibility(View.GONE);
+            holder.senderName.setVisibility(View.GONE);
         }
     }
 
@@ -61,27 +62,18 @@ public class RequestAdapter extends RecyclerView.Adapter<RequestAdapter.RequestV
 
     static class RequestViewHolder extends RecyclerView.ViewHolder {
         TextView roomNameText;
-        TextView requestStatusText;
         LinearLayout buttonLayout;
         Button acceptButton;
         Button rejectButton;
+        TextView senderName;
 
         RequestViewHolder(@NonNull View itemView) {
             super(itemView);
             roomNameText = itemView.findViewById(R.id.roomNameText);
-            requestStatusText = itemView.findViewById(R.id.requestStatusText);
+            senderName = itemView.findViewById(R.id.senderName);
             buttonLayout = itemView.findViewById(R.id.buttonLayout);
             acceptButton = itemView.findViewById(R.id.acceptButton);
             rejectButton = itemView.findViewById(R.id.rejectButton);
-        }
-    }
-
-    private String getStatusText(String status) {
-        switch (status) {
-            case "pending": return "대기중";
-            case "accepted": return "수락됨";
-            case "rejected": return "거절됨";
-            default: return "";
         }
     }
 

@@ -110,7 +110,7 @@ public class ChattingWindowFragment extends Fragment {
 
     private void sendMessage(String message) {
         if (!message.trim().isEmpty()) {
-            long timeStamp = System.currentTimeMillis() + TimeZone.getTimeZone("Asia/Seoul").getRawOffset();
+            long timeStamp = System.currentTimeMillis();
 
             String nickName = MainActivity.Login_id.substring(0, MainActivity.Login_id.indexOf("@"));
             ChatData chatData = new ChatData(nickName, message, timeStamp);

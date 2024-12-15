@@ -7,7 +7,6 @@ public class JoinRequest {
     private String requesterId;
     private String requesterNickname;
     private String leaderId;
-    private String status;
     private long timestamp;
 
     public JoinRequest() {}
@@ -19,7 +18,6 @@ public class JoinRequest {
         this.requesterId = requesterId;
         this.requesterNickname = requesterNickname;
         this.leaderId = leaderId;
-        this.status = "pending";
         this.timestamp = System.currentTimeMillis();
     }
 
@@ -59,10 +57,6 @@ public class JoinRequest {
         return roomName;
     }
 
-    public String getStatus() {
-        return status;
-    }
-
     public void setRequesterNickname(String requesterNickname) {
         this.requesterNickname = requesterNickname;
     }
@@ -77,10 +71,6 @@ public class JoinRequest {
 
     public void setRoomName(String roomName) {
         this.roomName = roomName;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
     }
 
     public void setTimestamp(long timestamp) {

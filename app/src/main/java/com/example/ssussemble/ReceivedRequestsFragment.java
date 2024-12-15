@@ -89,7 +89,7 @@ public class ReceivedRequestsFragment extends Fragment {
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         for (DataSnapshot requestSnapshot : snapshot.getChildren()) {
                             JoinRequest request = requestSnapshot.getValue(JoinRequest.class);
-                            if (request != null && "pending".equals(request.getStatus())) {
+                            if (request != null) {
                                 requestList.add(request);
                             }
                         }

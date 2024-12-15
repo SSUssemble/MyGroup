@@ -113,28 +113,41 @@ public class RoomDetailFragment extends Fragment {
 
     private void setupExitButton(Button exitRoomButton) {
         String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        databaseReference.child(roomId).addListenerForSingleValueEvent(new ValueEventListener() {
+        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(currentUserId);
+
+        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                String header = snapshot.child("header").getValue(String.class);
-                boolean isLeader = currentUserId.equals(snapshot.child("participants").child(header).getValue(String.class));
-                boolean isParticipant = snapshot.child("participants").hasChild(currentUserId);
+                String displayName = snapshot.child("displayName").getValue(String.class);
 
-                exitRoomButton.setEnabled(isParticipant);
-                joinRequestButton.setEnabled(!isParticipant);
+                databaseReference.child(roomId).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        String header = snapshot.child("header").getValue(String.class);
+                        boolean isLeader = currentUserId.equals(snapshot.child("participants").child(header).getValue(String.class));
+                        boolean isParticipant = snapshot.child("participants").hasChild(displayName);
 
-                exitRoomButton.setOnClickListener(v -> {
-                    if (isLeader) {
-                        deleteRoom();
-                    } else {
-                        leaveRoom(currentUserId);
+                        exitRoomButton.setEnabled(isParticipant);
+                        joinRequestButton.setEnabled(!isParticipant);
+
+                        exitRoomButton.setOnClickListener(v -> {
+                            if (isLeader) {
+                                deleteRoom();
+                            } else {
+                                leaveRoom(displayName);
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Log.e(TAG, "방 정보 로드 실패", error.toException());
                     }
                 });
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Log.e(TAG, "방 정보 로드 실패", error.toException());
             }
         });
     }
@@ -191,7 +204,6 @@ public class RoomDetailFragment extends Fragment {
                         requestData.put("requesterId", currentUserId);
                         requestData.put("requesterNickname", requesterNickname);
                         requestData.put("leaderId", leaderId);
-                        requestData.put("status", "pending");
                         requestData.put("timestamp", ServerValue.TIMESTAMP);
 
                         requestsRef.child(requestId).setValue(requestData)
