@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -16,7 +17,7 @@ import java.util.List;
 
 public class MyGroupsAdapter extends RecyclerView.Adapter<MyGroupsAdapter.GroupViewHolder> {
     private List<Room> groupList;
-    private final WeakReference<Context> contextRef;
+    private final WeakReference<Context> contextRef;;
 
     public MyGroupsAdapter(List<Room> groupList, Context context) {
         this.groupList = groupList;
