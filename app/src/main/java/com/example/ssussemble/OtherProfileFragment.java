@@ -14,27 +14,46 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class OtherProfileFragment extends Fragment {
     private static final String ARG_USER_ID = "user_id";
     private static final String TAG = "OtherProfileFragment";
 
-    private String userId; // 클릭된 유저의 ID
-    private ImageView profileImageView, timeTableView;
-    private TextView userNameText, userEmailText, userDepartmentText, groupCountText;
-    private ImageView backButton;
+    private String userId; // 평가받는 유저의 ID
+    private String currentUserId; // 평가하는 유저의 ID
+    private ImageView profileImageView, timeTableView, reputationImage;
+    private TextView userNameText, userEmailText, userDepartmentText, groupCountText, myRateText;
+    private ImageView backButton, veryGood, good, soso, bad, veryBad;
+
+    private int selectedIndex = -1; // 현재 선택된 이미지의 인덱스
+    private final int[] imagesUnselected = {
+            R.drawable.very_good, R.drawable.good,
+            R.drawable.soso, R.drawable.bad, R.drawable.very_bad
+    };
+
+    private final int[] imagesSelected = {
+            R.drawable.very_good_color, R.drawable.good_color,
+            R.drawable.soso_color, R.drawable.bad_color, R.drawable.very_bad_color
+    };
+
+    private final int[] scores = {100, 75, 50, 25, 0};
+    private ImageView[] rateImages;
 
     private DatabaseReference databaseReference;
+    private DatabaseReference evaluationsReference; // 유저별 평가 저장소
 
-    // **newInstance 메서드**
     public static OtherProfileFragment newInstance(String userId) {
         OtherProfileFragment fragment = new OtherProfileFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_USER_ID, userId); // 전달받은 userId를 ARG_USER_ID에 저장
+        args.putString(ARG_USER_ID, userId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -42,17 +61,26 @@ public class OtherProfileFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         if (getArguments() != null) {
-            userId = getArguments().getString(ARG_USER_ID); // 전달된 userId를 변수에 저장
+            userId = getArguments().getString(ARG_USER_ID); // 평가받는 유저의 ID
         }
+
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        if (auth.getCurrentUser() != null) {
+            currentUserId = auth.getCurrentUser().getUid();
+        }
+
         databaseReference = FirebaseDatabase.getInstance().getReference("users").child(userId);
+        evaluationsReference = FirebaseDatabase.getInstance().getReference("evaluations").child(userId);
     }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_other_profile, container, false);
 
-        // XML 레이아웃에서 View 초기화
+        // View 초기화
+        myRateText = view.findViewById(R.id.myRate);
         profileImageView = view.findViewById(R.id.profileImageView);
         timeTableView = view.findViewById(R.id.timeTableView);
         userNameText = view.findViewById(R.id.userName);
@@ -60,39 +88,200 @@ public class OtherProfileFragment extends Fragment {
         userDepartmentText = view.findViewById(R.id.userDepartment);
         groupCountText = view.findViewById(R.id.groupCount);
         backButton = view.findViewById(R.id.back_button_image);
+        veryGood = view.findViewById(R.id.very_good);
+        good = view.findViewById(R.id.good);
+        soso = view.findViewById(R.id.soso);
+        bad = view.findViewById(R.id.bad);
+        veryBad = view.findViewById(R.id.very_bad);
+        reputationImage = view.findViewById(R.id.reputation_image);
 
-        backButton.setOnClickListener(view1 -> {
-                getParentFragmentManager().popBackStack();
-        });
+        rateImages = new ImageView[]{veryGood, good, soso, bad, veryBad};
 
+        // 뒤로가기 버튼 클릭 이벤트
+        backButton.setOnClickListener(v -> getParentFragmentManager().popBackStack());
 
-        loadUserInfo();
+        setupImageClickListeners();
+        initializeReputation();
+        loadUserInfo(); // 사용자 정보 로드 및 이미지 표시
+        setupLastSelectedImage();
+
         return view;
     }
 
-    private void loadUserInfo() {
-        if (userId == null) {
-            Log.e(TAG, "User ID is null");
-            Toast.makeText(getContext(), "사용자 정보를 불러올 수 없습니다.", Toast.LENGTH_SHORT).show();
-            return;
+    private void initializeReputation() {
+        databaseReference.addListenerForSingleValueEvent(new com.google.firebase.database.ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (!snapshot.exists()) {
+                    Map<String, Object> initialData = new HashMap<>();
+                    initialData.put("reputation", 50); // 초기 평판 점수
+                    initialData.put("totalScore", 50); // 총점 기본값
+                    initialData.put("count", 1); // 카운트 기본값
+                    databaseReference.updateChildren(initialData).addOnSuccessListener(aVoid -> {
+                        setHighlightedImage(2); // 기본적으로 soso 강조
+                        updateReputationDisplay();
+                    }).addOnFailureListener(e ->
+                            Log.e(TAG, "Failed to initialize reputation", e)
+                    );
+                } else {
+                    updateReputationDisplay();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e(TAG, "initializeReputation failed: " + error.getMessage());
+            }
+        });
+    }
+
+    private void setupLastSelectedImage() {
+        evaluationsReference.child(currentUserId).addListenerForSingleValueEvent(new com.google.firebase.database.ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    int lastSelectedScore = snapshot.getValue(Integer.class);
+                    selectedIndex = getIndexFromScore(lastSelectedScore);
+                    if (selectedIndex != -1) {
+                        setHighlightedImage(selectedIndex); // 마지막 선택한 이미지를 강조
+                    }
+                } else {
+                    setHighlightedImage(2); // 기본적으로 soso 강조
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e(TAG, "Failed to load last selected image: " + error.getMessage());
+            }
+        });
+    }
+
+    private int getIndexFromScore(int score) {
+        for (int i = 0; i < scores.length; i++) {
+            if (scores[i] == score) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private void setupImageClickListeners() {
+        for (int i = 0; i < rateImages.length; i++) {
+            int index = i;
+            rateImages[i].setOnClickListener(v -> {
+                if (selectedIndex != -1 && selectedIndex == index) {
+                    Toast.makeText(getContext(), "이미 선택한 평점입니다.", Toast.LENGTH_SHORT).show();
+                } else {
+                    updateReputation(index);
+                }
+            });
+        }
+    }
+
+    private void updateReputation(int index) {
+        if (selectedIndex != -1) {
+            resetImage(selectedIndex); // 이전 선택 이미지 초기화
         }
 
+        setHighlightedImage(index);
+        selectedIndex = index;
+
+        int newScore = scores[index];
+        evaluationsReference.child(currentUserId).addListenerForSingleValueEvent(new com.google.firebase.database.ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                int oldScore = snapshot.exists() ? snapshot.getValue(Integer.class) : 50; // 기본값 50
+
+                Map<String, Object> updates = new HashMap<>();
+                updates.put(currentUserId, newScore);
+
+                evaluationsReference.updateChildren(updates).addOnSuccessListener(aVoid -> {
+                    calculateReputation(oldScore, newScore);
+                }).addOnFailureListener(e -> Toast.makeText(getContext(), "평가 업데이트 실패", Toast.LENGTH_SHORT).show());
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(getContext(), "평가 로드 실패", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void calculateReputation(int oldScore, int newScore) {
+        databaseReference.addListenerForSingleValueEvent(new com.google.firebase.database.ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                long totalScore = snapshot.child("totalScore").exists() ? snapshot.child("totalScore").getValue(Long.class) : 50;
+                long count = snapshot.child("count").exists() ? snapshot.child("count").getValue(Long.class) : 1;
+
+                totalScore = totalScore - oldScore + newScore; // 이전 점수 빼고 새 점수 추가
+                double newReputation = (double) totalScore / count;
+
+                Map<String, Object> updates = new HashMap<>();
+                updates.put("totalScore", totalScore);
+                updates.put("count", count);
+                updates.put("reputation", newReputation);
+
+                databaseReference.updateChildren(updates).addOnSuccessListener(aVoid -> updateReputationDisplay())
+                        .addOnFailureListener(e -> Toast.makeText(getContext(), "평판 업데이트 실패", Toast.LENGTH_SHORT).show());
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(getContext(), "평판 계산 실패", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void updateReputationDisplay() {
+        databaseReference.child("reputation").addListenerForSingleValueEvent(new com.google.firebase.database.ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                double reputation = snapshot.exists() ? snapshot.getValue(Double.class) : 50;
+                int roundedReputation = (int) Math.round(reputation);
+
+                if (roundedReputation >= 90) {
+                    reputationImage.setImageResource(R.drawable.very_good_color);
+                } else if (roundedReputation >= 60) {
+                    reputationImage.setImageResource(R.drawable.good_color);
+                } else if (roundedReputation >= 40) {
+                    reputationImage.setImageResource(R.drawable.soso_color);
+                } else if (roundedReputation >= 10) {
+                    reputationImage.setImageResource(R.drawable.bad_color);
+                } else {
+                    reputationImage.setImageResource(R.drawable.very_bad_color);
+                }
+
+                myRateText.setText("평가: " + roundedReputation);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(getContext(), "평판 로드 실패", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void setHighlightedImage(int index) {
+        rateImages[index].setImageResource(imagesSelected[index]);
+    }
+
+    private void resetImage(int index) {
+        rateImages[index].setImageResource(imagesUnselected[index]);
+    }
+
+    private void loadUserInfo() {
         databaseReference.addListenerForSingleValueEvent(new com.google.firebase.database.ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
-                    String displayName = snapshot.child("displayName").getValue(String.class);
-                    String email = snapshot.child("email").getValue(String.class);
-                    String department = snapshot.child("department").getValue(String.class);
-                    String grade = snapshot.child("grade").getValue(String.class);
-                    String profileImageUrl = snapshot.child("profileImageUrl").getValue(String.class);
-                    String scheduleImageUrl = snapshot.child("scheduleUrl").getValue(String.class);
-
-                    userNameText.setText(displayName != null ? displayName : "이름 없음");
-                    userEmailText.setText(email != null ? email : "이메일 없음");
-                    userDepartmentText.setText(department + " " + grade + "학년");
+                    userNameText.setText(snapshot.child("displayName").getValue(String.class));
+                    userEmailText.setText(snapshot.child("email").getValue(String.class));
+                    userDepartmentText.setText(snapshot.child("department").getValue(String.class));
 
                     // 프로필 이미지 로드
+                    String profileImageUrl = snapshot.child("profileImageUrl").getValue(String.class);
                     if (profileImageUrl != null) {
                         Glide.with(OtherProfileFragment.this)
                                 .load(profileImageUrl)
@@ -102,48 +291,19 @@ public class OtherProfileFragment extends Fragment {
                     }
 
                     // 시간표 이미지 로드
-                    if (scheduleImageUrl != null) {
+                    String timeTableImageUrl = snapshot.child("timeTableUrl").getValue(String.class);
+                    if (timeTableImageUrl != null) {
                         Glide.with(OtherProfileFragment.this)
-                                .load(scheduleImageUrl)
+                                .load(timeTableImageUrl)
                                 .placeholder(R.drawable.baseline_image_24)
                                 .into(timeTableView);
                     }
-
-                    loadGroupCount(displayName);
-                } else {
-                    Toast.makeText(getContext(), "사용자 정보가 없습니다.", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Log.e(TAG, "사용자 정보 로드 실패", error.toException());
                 Toast.makeText(getContext(), "사용자 정보 로드 실패", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    private void loadGroupCount(String displayName) {
-        if (displayName == null) return;
-
-        DatabaseReference roomsRef = FirebaseDatabase.getInstance().getReference("rooms");
-
-        roomsRef.addListenerForSingleValueEvent(new com.google.firebase.database.ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                int groupCount = 0;
-                for (DataSnapshot roomSnapshot : snapshot.getChildren()) {
-                    if (roomSnapshot.child("participants").hasChild(displayName) ||
-                            displayName.equals(roomSnapshot.child("header").getValue(String.class))) {
-                        groupCount++;
-                    }
-                }
-                groupCountText.setText("참여한 그룹 수: " + groupCount);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Log.e(TAG, "그룹 수 로드 실패", error.toException());
             }
         });
     }
