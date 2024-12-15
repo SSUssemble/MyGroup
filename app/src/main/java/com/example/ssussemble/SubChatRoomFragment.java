@@ -149,11 +149,6 @@ public class SubChatRoomFragment extends Fragment {
                                                         args.putString("ROOM_ID", subRoomId);
                                                         args.putString("title", title);
                                                         chatFragment.setArguments(args);
-
-                                                        getParentFragmentManager().beginTransaction()
-                                                                .replace(R.id.fragment_container, chatFragment)
-                                                                .addToBackStack(null)
-                                                                .commit();
                                                     });
                                         }
 
