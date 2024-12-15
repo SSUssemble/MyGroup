@@ -17,34 +17,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <ImageView
-        android:id="@+id/settingButton"
-        android:layout_width="35dp"
-        android:layout_height="35dp"
-        android:layout_marginStart="355dp"
-        android:layout_marginTop="20dp"
-        android:clickable="true"
-        android:focusable="true"
-        android:src="@drawable/ic_setting"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
-
-    <ImageView
-        android:id="@+id/notificationButton"
-        android:layout_width="35dp"
-        android:layout_height="35dp"
-        android:layout_marginStart="355dp"
-        android:layout_marginTop="70dp"
-        android:clickable="true"
-        android:focusable="true"
-        android:src="@drawable/ic_bell"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
-
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/profileImageView"
         android:layout_width="120dp"
@@ -110,7 +82,7 @@
             android:id="@+id/groupCount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="내가 참여한 그룹: N"
+            android:text="참여한 그룹: N"
             android:theme="@style/MediumFont"
             android:textSize="17sp"
             android:layout_gravity="start|center"
@@ -148,7 +120,7 @@
                 android:layout_height="350dp"
                 android:clickable="true"
                 android:focusable="true"
-                android:src="@drawable/baseline_image_24" />
+                android:src="@drawable/ic_schedule" />
 
         </LinearLayout>
     </ScrollView>

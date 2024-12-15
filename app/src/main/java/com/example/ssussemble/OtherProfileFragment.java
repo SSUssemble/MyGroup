@@ -105,7 +105,7 @@ public class OtherProfileFragment extends Fragment {
                     if (scheduleImageUrl != null) {
                         Glide.with(OtherProfileFragment.this)
                                 .load(scheduleImageUrl)
-                                .placeholder(R.drawable.baseline_image_24)
+                                .placeholder(R.drawable.ic_schedule)
                                 .into(timeTableView);
                     }
 

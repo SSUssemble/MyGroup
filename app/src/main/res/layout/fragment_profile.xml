@@ -10,6 +10,7 @@
         android:id="@+id/settingButton"
         android:layout_width="35dp"
         android:layout_height="35dp"
+        android:layout_weight="1"
         android:layout_marginStart="355dp"
         android:layout_marginTop="20dp"
         android:clickable="true"
@@ -24,6 +25,7 @@
         android:id="@+id/notificationButton"
         android:layout_width="35dp"
         android:layout_height="35dp"
+        android:layout_weight="1"
         android:layout_marginStart="355dp"
         android:layout_marginTop="70dp"
         android:clickable="true"
@@ -38,6 +40,7 @@
         android:id="@+id/profileImageView"
         android:layout_width="120dp"
         android:layout_height="120dp"
+        android:layout_weight="1"
         android:layout_marginTop="60dp"
         android:clickable="true"
         android:focusable="true"
@@ -52,6 +55,7 @@
         android:id="@+id/userName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:text="사용자 1"
         android:theme="@style/MediumFont"
         app:layout_constraintTop_toBottomOf="@id/profileImageView"
@@ -66,6 +70,7 @@
         android:id="@+id/userEmail"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:text="user1@soongsil.ac.kr"
         android:textSize="15sp"
         android:theme="@style/MediumFont"
@@ -77,6 +82,7 @@
         android:layout_width="350dp"
         android:id="@+id/departmentFrame"
         android:layout_height="130dp"
+        android:layout_weight="1"
         android:layout_marginTop="14dp"
         android:background="@drawable/rectangle"
         app:layout_constraintTop_toBottomOf="@id/userEmail"
@@ -119,25 +125,21 @@
     <ScrollView
         android:layout_width="350dp"
         android:layout_height="0dp"
+        android:layout_weight="1"
         android:layout_marginTop="10dp"
         app:layout_constraintTop_toBottomOf="@id/departmentFrame"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/timeTableView"
+            android:layout_width="350dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:focusable="true"
+            android:src="@drawable/ic_schedule" />
 
-            <com.google.android.material.imageview.ShapeableImageView
-                android:id="@+id/timeTableView"
-                android:layout_width="350dp"
-                android:layout_height="350dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:src="@drawable/baseline_image_24" />
-
-        </LinearLayout>
     </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

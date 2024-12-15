@@ -4,11 +4,13 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
+    android:layout_weight="1"
     android:padding="16dp">
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:text="서브채팅방 이름"
         android:textSize="16sp"
         android:textStyle="bold" />
@@ -17,6 +19,7 @@
         android:id="@+id/etSubChatRoomName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:layout_marginTop="8dp"
         android:hint="채팅방 이름을 입력하세요"
         android:inputType="text"

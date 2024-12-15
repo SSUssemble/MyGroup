@@ -20,11 +20,12 @@
         <EditText
             android:id="@+id/search_edit_text"
             android:layout_width="0dp"
-            android:layout_height="48dp"
+            android:layout_height="40dp"
             android:layout_weight="1"
             android:hint="검색"
             android:theme="@style/MediumFont"
             android:padding="10dp" />
+
 
         <Button
             android:id="@+id/searchClearButton"
