@@ -3,6 +3,7 @@ package com.example.ssussemble;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,10 +14,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import androidx.annotation.*;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
@@ -28,40 +26,20 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 public class ProfileFragment extends Fragment {
     private FirebaseAuth mAuth;
-    private static final String TAG = "ProfileFragment";
+    private static final int PICK_IMAGE_REQUEST = 1;
     private ImageView profileImageView;
     private FragmentProfileBinding binding;
     private TextView groupCountText;
     private DatabaseReference databaseReference;
     private TextView mySchedule;
-    private StorageReference storageReference;
-
-    // ActivityResultLauncher 초기화
-    private ActivityResultLauncher<Intent> imagePickerLauncher;
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        // ActivityResultLauncher 설정
-        imagePickerLauncher = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                result -> {
-                    if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
-                        Uri imageUri = result.getData().getData();
-                        if (imageUri != null) {
-                            uploadImageToFirebase(imageUri);
-                        }
-                    }
-                }
-        );
-
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -72,29 +50,42 @@ public class ProfileFragment extends Fragment {
         mySchedule = view.findViewById(R.id.mySchedule);
         profileImageView = binding.profileImageView;
         databaseReference = FirebaseDatabase.getInstance().getReference();
-        storageReference = FirebaseStorage.getInstance().getReference("profile_images");
 
-        // 이미지 선택 기능 연결
-        profileImageView.setOnClickListener(v -> openImagePicker());
+        // Handle profile image click
+        profileImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openImagePicker();
+            }
+        });
 
-        // 설정 페이지 이동
+        // Navigate to app settings
         ImageView toSetting = binding.settingButton;
-        toSetting.setOnClickListener(view1 -> {
-            Intent intent = new Intent(getActivity(), AppSetting.class);
-            startActivity(intent);
+        toSetting.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getActivity(), AppSetting.class);
+                startActivity(intent);
+            }
         });
 
-        mySchedule.setOnClickListener(view12 -> {
-            Fragment scheduleFragment = new ScheduleFragment();
-            requireActivity().getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, scheduleFragment)
-                    .addToBackStack(null)
-                    .commit();
+        mySchedule.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Fragment ScheduleFragment = new ScheduleFragment();
+
+                ScheduleFragment.getParentFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_container, new ScheduleFragment())
+                        .addToBackStack(null)
+                        .commit();
+            }
         });
+
 
         loadProfileImage();
         loadUserInfo();
         setupNotificationButton();
+
         loadGroupCount();
         setupGroupClickListener();
 
@@ -125,14 +116,14 @@ public class ProfileFragment extends Fragment {
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
-                        Log.e(TAG, "그룹 수 로드 실패", error.toException());
+                        Log.e("ProfileFragment", "그룹 수 로드 실패", error.toException());
                     }
                 });
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Log.e(TAG, "사용자 정보 로드 실패", error.toException());
+                Log.e("ProfileFragment", "사용자 정보 로드 실패", error.toException());
             }
         });
     }
@@ -147,6 +138,7 @@ public class ProfileFragment extends Fragment {
                     .commit();
         });
     }
+
 
     private void loadUserInfo() {
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -194,68 +186,68 @@ public class ProfileFragment extends Fragment {
     }
 
     private void loadProfileImage() {
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        if (currentUser == null) {
-            Log.e(TAG, "User not logged in");
-            return;
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
+        String imageFileName = sharedPreferences.getString("profile_image_uri", null);
+
+        if (imageFileName != null) {
+            File profileImageFile = new File(getActivity().getFilesDir(), imageFileName);
+
+            if (profileImageFile.exists()) {
+                Uri imageUri = Uri.fromFile(profileImageFile);
+
+                Glide.with(this)
+                        .load(imageUri)
+                        .circleCrop()
+                        .placeholder(R.drawable.default_profile)
+                        .into(profileImageView);
+            }
         }
-
-        String userId = currentUser.getUid();
-        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(userId);
-
-        userRef.child("profileImageUrl").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                String profileImageUrl = snapshot.getValue(String.class);
-                if (profileImageUrl != null) {
-                    Glide.with(ProfileFragment.this)
-                            .load(profileImageUrl)
-                            .circleCrop()
-                            .placeholder(R.drawable.default_profile)
-                            .into(profileImageView);
-                } else {
-                    Log.e(TAG, "Profile image URL is null");
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Log.e(TAG, "Failed to load profile image", error.toException());
-            }
-        });
     }
-
 
     private void openImagePicker() {
         Intent intent = new Intent();
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
-        imagePickerLauncher.launch(Intent.createChooser(intent, "Select Picture"));
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
     }
 
-    private void uploadImageToFirebase(Uri imageUri) {
-        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        StorageReference userImageRef = storageReference.child(userId + ".jpg");
 
-        userImageRef.putFile(imageUri).addOnSuccessListener(taskSnapshot -> {
-            userImageRef.getDownloadUrl().addOnSuccessListener(uri -> {
-                saveProfileImageUriToDatabase(uri.toString());
-                Glide.with(this)
-                        .load(uri)
-                        .circleCrop()
-                        .placeholder(R.drawable.default_profile)
-                        .into(profileImageView);
-            });
-        }).addOnFailureListener(e -> {
-            Toast.makeText(getContext(), "이미지 업로드 실패: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-        });
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK && data != null) {
+            Uri imageUri = data.getData();
+            saveImageToInternalStorage(imageUri);
+            Glide.with(this)
+                    .load(imageUri)
+                    .circleCrop()
+                    .placeholder(R.drawable.default_profile)
+                    .into(profileImageView);
+        }
     }
 
-    private void saveProfileImageUriToDatabase(String imageUrl) {
-        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(userId);
-        userRef.child("profileImageUrl").setValue(imageUrl)
-                .addOnSuccessListener(aVoid -> Toast.makeText(getContext(), "프로필 이미지 업데이트 성공", Toast.LENGTH_SHORT).show())
-                .addOnFailureListener(e -> Toast.makeText(getContext(), "프로필 이미지 업데이트 실패: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+    private void saveImageToInternalStorage(Uri imageUri) {
+        try {
+            InputStream inputStream = getActivity().getContentResolver().openInputStream(imageUri);
+            FileOutputStream fileOutputStream = getActivity().openFileOutput("profile_image.jpg", Context.MODE_PRIVATE);
+
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = inputStream.read(buffer)) > 0) {
+                fileOutputStream.write(buffer, 0, length);
+            }
+
+            fileOutputStream.close();
+            inputStream.close();
+
+            SharedPreferences sharedPreferences = getActivity().getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putString("profile_image_uri", "profile_image.jpg"); // Save the filename
+            editor.apply();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

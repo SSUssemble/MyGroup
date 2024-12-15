@@ -11,6 +11,7 @@ public class UserData {
     private String profileImageUrl;
     private String department;
     private String grade;
+    private String timeTableImageUrl;
 
     public UserData() {
     }
@@ -25,7 +26,10 @@ public class UserData {
         this.grade = "";
         if (user.getPhotoUrl() != null) {
             this.profileImageUrl = user.getPhotoUrl().toString();
+        } else {
+            this.profileImageUrl = "";
         }
+        this.timeTableImageUrl = "";
     }
 
     public String getUid() {
@@ -62,6 +66,12 @@ public class UserData {
 
     public String getProfileImageUrl() {
         return profileImageUrl;
+    }
+    public String getTimeTableImageUrl() {
+        return timeTableImageUrl;
+    }
+    public void setTimeTableImageUrl(String timeTableImageUrl) {
+        this.timeTableImageUrl = timeTableImageUrl;
     }
 
     public void setProfileImageUrl(String profileImageUrl) {
