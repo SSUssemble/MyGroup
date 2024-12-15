@@ -116,7 +116,7 @@
                 android:id="@+id/groupCount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="내가 참여한 그룹: N"
+                android:text="참가한 그룹: N"
                 android:theme="@style/MediumFont"
                 android:textSize="17sp"
                 android:layout_gravity="start|center"

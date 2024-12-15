@@ -284,9 +284,14 @@ public class OtherProfileFragment extends Fragment {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
-                    userNameText.setText(snapshot.child("displayName").getValue(String.class));
-                    userEmailText.setText(snapshot.child("email").getValue(String.class));
-                    userDepartmentText.setText(snapshot.child("department").getValue(String.class));
+                    String displayName = snapshot.child("displayName").getValue(String.class);
+                    String email = snapshot.child("email").getValue(String.class);
+                    String department = snapshot.child("department").getValue(String.class);
+                    String grade = snapshot.child("grade").getValue(String.class);
+
+                    userNameText.setText(displayName != null ? displayName : "이름 없음");
+                    userEmailText.setText(email != null ? email : "이메일 없음");
+                    userDepartmentText.setText(department + " " + grade + "학년");
 
                     // 프로필 이미지 로드
                     String profileImageUrl = snapshot.child("profileImageUrl").getValue(String.class);
@@ -306,7 +311,33 @@ public class OtherProfileFragment extends Fragment {
                                 .placeholder(R.drawable.baseline_image_24)
                                 .into(timeTableView);
                     }
+                    loadGroupCount(displayName);
                 }
+            }
+
+            private void loadGroupCount(String displayName) {
+                if (displayName == null) return;
+
+                DatabaseReference roomsRef = FirebaseDatabase.getInstance().getReference("rooms");
+
+                roomsRef.addListenerForSingleValueEvent(new com.google.firebase.database.ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        int groupCount = 0;
+                        for (DataSnapshot roomSnapshot : snapshot.getChildren()) {
+                            if (roomSnapshot.child("participants").hasChild(displayName) ||
+                                    displayName.equals(roomSnapshot.child("header").getValue(String.class))) {
+                                groupCount++;
+                            }
+                        }
+                        groupCountText.setText("참여한 그룹 수: " + groupCount);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Log.e(TAG, "그룹 수 로드 실패", error.toException());
+                    }
+                });
             }
 
             @Override
