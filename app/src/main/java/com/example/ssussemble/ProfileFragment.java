@@ -1,7 +1,6 @@
 package com.example.ssussemble;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -16,7 +15,6 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
@@ -39,7 +37,8 @@ public class ProfileFragment extends Fragment {
     private FragmentProfileBinding binding;
     private TextView groupCountText;
     private DatabaseReference databaseReference;
-    private StorageReference storageReference;
+    private StorageReference profileReference;
+    private StorageReference scheduleReference;
 
     // ActivityResultLauncher 초기화
     private ActivityResultLauncher<Intent> imagePickerLauncher;
@@ -85,7 +84,8 @@ public class ProfileFragment extends Fragment {
         profileImageView = binding.profileImageView;
         schedule = binding.timeTableView;
         databaseReference = FirebaseDatabase.getInstance().getReference();
-        storageReference = FirebaseStorage.getInstance().getReference("profile_images");
+        profileReference = FirebaseStorage.getInstance().getReference("profile_images");
+        scheduleReference = FirebaseStorage.getInstance().getReference("schedule_images");
 
         // 이미지 선택 기능 연결
         profileImageView.setOnClickListener(v -> openProfileImagePicker());
@@ -99,6 +99,7 @@ public class ProfileFragment extends Fragment {
         });
 
         loadProfileImage();
+        loadScheduleImage();
         loadUserInfo();
         setupNotificationButton();
         loadGroupCount();
@@ -231,6 +232,37 @@ public class ProfileFragment extends Fragment {
         });
     }
 
+    private void loadScheduleImage() {
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser == null) {
+            Log.e(TAG, "User not logged in");
+            return;
+        }
+
+        String userId = currentUser.getUid();
+        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(userId);
+
+        userRef.child("scheduleUrl").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                String scheduleUrl = snapshot.getValue(String.class);
+                if (scheduleUrl != null) {
+                    Glide.with(ProfileFragment.this)
+                            .load(scheduleUrl)
+                            .placeholder(R.drawable.baseline_image_24)
+                            .into(schedule);
+                } else {
+                    Log.e(TAG, "Profile image URL is null");
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e(TAG, "Failed to load profile image", error.toException());
+            }
+        });
+    }
+
 
     private void openProfileImagePicker() {
         Intent intent = new Intent();
@@ -248,7 +280,7 @@ public class ProfileFragment extends Fragment {
 
     private void uploadImageToFirebase(Uri imageUri) {
         String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        StorageReference userImageRef = storageReference.child(userId + ".jpg");
+        StorageReference userImageRef = profileReference.child(userId + ".jpg");
 
         userImageRef.putFile(imageUri).addOnSuccessListener(taskSnapshot -> {
             userImageRef.getDownloadUrl().addOnSuccessListener(uri -> {
@@ -266,7 +298,7 @@ public class ProfileFragment extends Fragment {
 
     private void uploadScheduleToFirebase(Uri imageUri) {
         String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        StorageReference scheduleRef = storageReference.child("schedule_images").child(userId + "_schedule.jpg"); // schedule_images 경로로 설정
+        StorageReference scheduleRef = scheduleReference.child(userId + "_schedule.jpg"); // schedule_images 경로로 설정
 
         scheduleRef.putFile(imageUri).addOnSuccessListener(taskSnapshot -> {
             scheduleRef.getDownloadUrl().addOnSuccessListener(uri -> {
