@@ -291,7 +291,7 @@ public class OtherProfileFragment extends Fragment {
                     }
 
                     // 시간표 이미지 로드
-                    String timeTableImageUrl = snapshot.child("timeTableUrl").getValue(String.class);
+                    String timeTableImageUrl = snapshot.child("scheduleUrl").getValue(String.class);
                     if (timeTableImageUrl != null) {
                         Glide.with(OtherProfileFragment.this)
                                 .load(timeTableImageUrl)
