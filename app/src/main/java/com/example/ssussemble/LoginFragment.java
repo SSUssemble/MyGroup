@@ -71,7 +71,7 @@ public class LoginFragment extends Fragment {
                     })
                     .addOnFailureListener(e -> {
                         showLoading(false);
-                        showError("로그인 실패: " + e.getMessage());
+                        showError("로그인 실패: 아이디 또는 비밀번호를 확인하세요");
                     });
         }
     }
