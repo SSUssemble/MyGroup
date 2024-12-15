@@ -49,6 +49,7 @@ public class ChattingWindowFragment extends Fragment {
     private String roomId;
     private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     private DatabaseReference databaseReference = firebaseDatabase.getReference();
+    private String currentUserNickname;
 
     public static ChattingWindowFragment newInstance(String roomId) {
         ChattingWindowFragment fragment = new ChattingWindowFragment();
@@ -98,7 +99,7 @@ public class ChattingWindowFragment extends Fragment {
             layoutManager = new LinearLayoutManager(getContext());
             layoutManager.setStackFromEnd(true);
             recyclerView.setLayoutManager(layoutManager);
-            chatAdapter = new ChatAdapter();
+            chatAdapter = new ChatAdapter(currentUserNickname);
             recyclerView.setAdapter(chatAdapter);
 
             initializeMessageListener();
@@ -107,8 +108,37 @@ public class ChattingWindowFragment extends Fragment {
                 String message = binding.ChattingMessage.getText().toString();
                 sendMessage(message);
             });
+
+            String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+            DatabaseReference userRef = FirebaseDatabase.getInstance()
+                    .getReference("users")
+                    .child(currentUserId);
+
+            userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot userSnapshot) {
+                    currentUserNickname = userSnapshot.child("displayName").getValue(String.class);
+                    setupChatAdapter();
+                    // 메시지 리스너 초기화
+                    initializeMessageListener();
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Toast.makeText(requireContext(), "사용자 정보 로드 실패", Toast.LENGTH_SHORT).show();
+                }
+            });
         }
         return binding.getRoot();
+    }
+
+    private void setupChatAdapter() {
+        recyclerView = binding.ChattingRecycler;
+        layoutManager = new LinearLayoutManager(getContext());
+        layoutManager.setStackFromEnd(true);
+        recyclerView.setLayoutManager(layoutManager);
+        chatAdapter = new ChatAdapter(currentUserNickname);
+        recyclerView.setAdapter(chatAdapter);
     }
 
     private void sendMessage(String message) {

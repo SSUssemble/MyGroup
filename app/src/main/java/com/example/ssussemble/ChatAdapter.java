@@ -27,13 +27,14 @@ import java.util.TimeZone;
 public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final int VIEW_TYPE_MINE = 1;
     private static final int VIEW_TYPE_OTHER = 2;
+    private String currentUserNickname;
 
     private List<ChatData> chatList = new ArrayList<>();
 
     String nickname;
-    public ChatAdapter() {
+    public ChatAdapter(String currentUserNickname) {
+        this.currentUserNickname = currentUserNickname;
     }
-
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -64,37 +65,17 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @Override
     public int getItemViewType(int position) {
         ChatData chat = chatList.get(position);
-
-        DatabaseReference userRef = FirebaseDatabase.getInstance()
-                .getReference("users")
-                .child(FirebaseAuth.getInstance().getCurrentUser().getUid());
-
-        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot userSnapshot) {
-                nickname = userSnapshot.child("displayName").getValue(String.class);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-            }
-        });
-
-        if (chat.getUserName().equals(nickname)) {
-            return VIEW_TYPE_MINE;
-        } else {
-            return VIEW_TYPE_OTHER;
-        }
-    }
-
-    @Override
-    public int getItemCount() {
-        return chatList.size();
+        return chat.getUserName().equals(currentUserNickname) ? VIEW_TYPE_MINE : VIEW_TYPE_OTHER;
     }
 
     public void addChat(ChatData chat) {
         chatList.add(chat);
         notifyItemInserted(chatList.size() - 1);
+    }
+
+    @Override
+    public int getItemCount() {
+        return chatList.size();
     }
 
     static class MyChatViewHolder extends RecyclerView.ViewHolder {
